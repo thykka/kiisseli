@@ -1,0 +1,11 @@
+{
+  "name": "botgame",
+  "version": "0.0.1",
+  "description": "chat-based games",
+  "main": "server.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "author": "Moses Holmström",
+  "license": "MIT"
+}
