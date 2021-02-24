@@ -149,7 +149,7 @@ function checkWord(message, args) {
     message.reply(`Oikein! Sinulla on ${ currentPoints } piste${ currentPoints > 1 ? 'ttä' : ''}.`);
     // show definition, if word was difficult
     if(WordGame_Attempts > 2) {
-      defineWordGameWord(message, [S_WordGame.currentWord]);
+      defineWordGameWord(message, [S_WordGame.currentAnswer]);
     }
     getNewWord(message, [S_WordGame.currentWord.length]);
     return;
@@ -167,7 +167,7 @@ function resetWordGame(message, args) {
   if(S_WordGame.currentWord){
     if(userPoints >= 10) {
       message.reply(`Sana oli ${ S_WordGame.currentAnswer}.`);
-      defineWordGameWord(message, [S_WordGame.currentWord]);
+      defineWordGameWord(message, [S_WordGame.currentAnswer]);
       S_WordGame.currentWord = null;
       S_WordGame.currentAnswer = null;
       Storage.setItem('WordGame_State', S_WordGame);
