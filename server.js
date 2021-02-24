@@ -159,10 +159,11 @@ function checkWord(message, args) {
   if(args[0].toUpperCase() === S_WordGame.currentAnswer.toUpperCase()) {
     addWordgamePoint(message.author);
     const currentPoints = getWordgamePoints(message.author);
-    message.react('😻');
+    message.react('🥇');
     message.reply(`Oikein! Sinulla on ${ currentPoints } piste${ currentPoints > 1 ? 'ttä' : ''}.`);
     // show definition, if word was difficult
     if(WordGame_Attempts > 2) {
+      message.react('😻');
       defineWordGameWord(message, [S_WordGame.currentAnswer]);
     }
     getNewWord(message);
