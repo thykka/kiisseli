@@ -18,10 +18,10 @@ const commands = [
   { fn: processWordGamePoints, triggers: ['solmu-pisteet','s-pts'], title: 'Näytä sanasolmun pisteet.' },
   { fn: resetWordGame, triggers: ['solmu-uusi','s-uus'], title: 'Skippaa nykyinen sana (maksaa 10 pistettä)' },
   { fn: defineWordGameWord, triggers: ['sanakirja', 'sk'], title: 'Etsi sana wiktionarysta' },
-  { fn: processZalgo, triggers: ['z'] },
   { fn: CatPics.randomCatPic, triggers: ['kuva'], title: 'Satunnainen kissakuva' },
   { fn: processReact, triggers: ['react'] },
-  { fn: showHelp, triggers: ['apua'], title: 'Näyttää toiminnot' }
+  { fn: require('./modules/zalgo.js'), triggers: ['z'] },
+  { fn: showHelp, triggers: ['apua','halp','help','apuva','komennot','commands'], title: 'Näyttää toiminnot' }
 ];
 
 const client = new Discord.Client();
@@ -53,8 +53,10 @@ function processReact(message, args) {
   // TODO
 }
 
-function showHelp(message, args) {
-  const result = commands.filter(c=>c.title && !c.hidden).map(c => c.triggers.map(t => '`!'+t+'`').join(',') + ' - ' + c.title).join('\n');
+function showHelp(message) {
+  const result = commands.filter(c => c.title && !c.hidden)
+    .map(c => `\`!${ c.triggers[0] }\` - ${ c.title }\n`)
+    .join('');
   message.reply(result);
 }
 
@@ -249,10 +251,6 @@ function processChatter(message) {
   return false;
 }
 
-const Zalgo = require('to-zalgo');
-function processZalgo(message, args) {
-  message.reply(Zalgo(args.join(' ')));
-}
 /*
 client.generateInvite({
   permissions: ['SEND_MESSAGES', 'MANAGE_GUILD', 'MENTION_EVERYONE'],
