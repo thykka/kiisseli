@@ -27,6 +27,7 @@ const commands = [
 const client = new Discord.Client();
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}`);
+  updateWordGamePresence(client);
 });
 
 client.on('message', message => {
@@ -112,6 +113,15 @@ async function loadWordGameState() {
   };
 }
 let S_WordGame = await loadWordGameState();
+function updateWordGamePresence(client) {
+  client.user.setPresence({
+    activity: {
+      name: `Solmu: ${ S_WordGame.currentWord }`,
+      type: 'PLAYING'
+    },
+    status: 'online'
+  });
+}
 function processWordGame(message, args) {
   if(!S_WordGame.currentWord) {
     if(parseInt(args[0]).toString() !== args[0]) {
@@ -150,6 +160,7 @@ function getNewWord(message, args) {
 
   Storage.setItem('WordGame_State', S_WordGame);
   message.channel.send(`Uusi sanasolmu: ${ S_WordGame.currentWord }`);
+  updateWordGamePresence(client);
 }
 function showCurrentWord(message) {
   message.channel.send(`Sanasolmu: ${ S_WordGame.currentWord }`);
