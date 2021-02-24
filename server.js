@@ -14,7 +14,7 @@ client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}`);
 });
 
-const roll7 = require('modules/roll7.js');
+const roll7 = require('./modules/roll7.js');
 
 const commands = [
   { fn: roll7, triggers: ['heitä7', '7'], title: 'Heitä 7 noppaa, pienin summa voittaa!' },
