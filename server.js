@@ -14,8 +14,10 @@ client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}`);
 });
 
+const roll7 = require('modules/roll7.js');
+
 const commands = [
-  { fn: processRoll7, triggers: ['heitä7', '7'], title: 'Heitä 7 noppaa, pienin summa voittaa!' },
+  { fn: roll7, triggers: ['heitä7', '7'], title: 'Heitä 7 noppaa, pienin summa voittaa!' },
   { fn: throwDice, triggers: ['noppa','n'], title: 'Heitä noppaa. Esim. `!noppa 12` arpoo luvun 1 ja 12 väliltä.' },
   { fn: chooseOne, triggers: ['kumpi','k'], title: 'Valitse yksi. Esim. `!kumpi kissat vai koirat`.' },
   { fn: processWordGame, triggers: ['solmu','s'], title: 'Pelaa sanasolmua. Esim. `!solmu arvaus`' },
@@ -216,35 +218,6 @@ function processWordGamePoints(message, [username] = []) {
   const result = Object.entries(HS_WordGame).map(([user,points]) => `${ user }: ${ points }`).join('\n');
   message.reply(result);
 }
-
-async function loadRoll7State() {
-  const savedState = await Storage.getItem('Roll7_Best');
-  return savedState || Infinity;
-}
-let S_Roll7 = await loadRoll7State();
-
-async function processRoll7(message, args) {
-  const best = S_Roll7;
-  if(['paras', 'top'].includes(args[0])) {
-    message.channel.send(`Paras heitto: ${best}`)
-    return;
-  }
-  const roll = () => floor(Math.random()*6)+1;
-  const dice = Array.from({ length: 7 }, roll);
-  const total = dice.reduce((a,d) => a+d, 0);
-  const formattedDice = dice.map(d => formatDice(d)).join(' ');
-  if(total < best) {
-    S_Roll7 = total;
-    await Storage.setItem('Roll7_Best', S_Roll7);
-    message.reply(`Heitit ${formattedDice} (${total}) - Uusi ennätys!`);
-  } else {
-    message.reply(`Heitit ${formattedDice} (${total})`);
-  }
-  if (total === 7) {
-    message.reply(`Heitit ${formattedDice} (${total}) - Se siitä sitten, voitit pelin!`)
-  }
-}
-
 
 function processChatter(message) {
   if(typeof message.content === 'string' && message.content.includes('perjantai')) {
