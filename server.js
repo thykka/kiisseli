@@ -149,7 +149,7 @@ function checkWord(message, args) {
     message.reply(`Oikein! Sinulla on ${ currentPoints } piste${ currentPoints > 1 ? 'ttä' : ''}.`);
     // show definition, if word was difficult
     if(WordGame_Attempts > 2) {
-      defineWordGameWord(message, args);
+      defineWordGameWord(message, [S_WordGame.currentWord]);
     }
     getNewWord(message, [S_WordGame.currentWord.length]);
     return;
