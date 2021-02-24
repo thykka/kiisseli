@@ -10,12 +10,21 @@ const { random, floor, round } = Math;
 
 const Discord = require('discord.js');
 const client = new Discord.Client();
-
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}`);
 });
 
+const commands = [
+  { fn: throwDice, triggers: ['noppa','n'], title: 'Heitä noppaa. Esim. `!noppa 12` arpoo luvun 1 ja 12 väliltä.' },
+  { fn: chooseOne, triggers: ['kumpi','k'], title: 'Valitse yksi. Esim. `!kumpi kissat vai koirat`.' },
+  { fn: processWordGame, triggers: ['solmu','s'], title: 'Pelaa sanasolmua. Esim. `!solmu arvaus`' },
+  { fn: processWordGamePoints, triggers: ['solmu-pisteet','s-pts'], title: 'Näytä sanasolmun pisteet.' },
+  { fn: resetWordGame, triggers: ['solmu-uusi','s-uus'], title: 'Skippaa nykyinen sana' },
+  { fn: showHelp, triggers: ['apua'], title: 'Näyttää toiminnot' }
+];
+
 client.on('message', message => {
+  if(processChatter(message)) return;
   if(message.content[0]!=='!') return;
   processCommand(
     extractCommand(message.content),
@@ -31,17 +40,8 @@ function extractCommand(text) {
   };
 }
 
-const commands = [
-  { fn: throwDice, triggers: ['n', 'noppa'], title: 'Heitä noppaa. Esim. `!noppa 12` arpoo luvun 1 ja 12 väliltä.' },
-  { fn: chooseOne, triggers: ['k', 'kumpi'], title: 'Valitse yksi. Esim. `!kumpi kissat vai koirat`.' },
-  { fn: processWordGame, triggers: ['s', 'solmu'], title: 'Pelaa sanasolmua. Esim. `!solmu arvaus`' },
-  { fn: processWordGamePoints, triggers: ['s-pts', 'solmu-pisteet'], title: 'Näytä sanasolmun pisteet.' },
-  { fn: resetWordGame, triggers: ['s-uus', 'solmu-uusi'], title: 'Skippaa nykyinen sana' },
-  { fn: showHelp, triggers: ['apua', 'komennot'], title: 'Näyttää toiminnot' }
-];
-
 function showHelp(message, args) {
-  const result = commands.map(c => c.triggers.map(t => '`!'+t+'`').join(',') + ' - ' + c.title).join('\n');
+  const result = commands.filter(c=>!c.hidden).map(c => c.triggers.map(t => '`!'+t+'`').join(',') + ' - ' + c.title).join('\n');
   message.reply(result);
 }
 
@@ -62,16 +62,19 @@ function throwDice(message, args) {
     return;
   }
   const result = floor(random() * sides + 1);
-  message.reply(`heitit ${
-    sides===6?'':sides+'-sivuista '
-  }noppaa, sait: ${result}.`);
+  if(sides === 6) {
+    const dieChar = '⚀⚁⚂⚃⚄⚅'[result-1];
+    message.reply(`heitit noppaa: ${ dieChar }`)
+    return;
+  }
+  message.reply(`heitit ${ sides }-sivuista noppaa, sait: ${result}.`);
 }
 
 const choosePrefixes = [
   'varmaan', 'ehkä', 'oisko', 'no tietysti', 'en tiiä, ehkä', 'en oo varma, mut kenties'
 ];
 const chooseSuffixes = [
- '','','','','','','.','!','?','??','?!','?!'
+  '','','','','','','.','!','?','??','?!','?!'
 ];
 
 function chooseOne(message, args) {
@@ -87,56 +90,66 @@ function chooseOne(message, args) {
   message.reply(`${ prefix } ${ choice }${ suffix }`);
 }
 
-const S_WordGame = {
-  currentWord: null,
-  currentAnswer: null
-};
-
 const WordGameWords = require('./wordgame-words.js');
 
-function resetWordGame(message, args) {
-  if(!S_WordGame.currentWord) {
-    message.reply(`Ei tässä sanasolmu ollut käynnissä muutenkaan.`);
-    return;
-  }
-  S_WordGame.currentWord = null;
-  S_WordGame.currentAnswer = null;
-  processWordGame(message, args);
+async function loadWordGameState() {
+  return await Storage.getItem('WordGame_State') || {
+    currentWord: null, currentAnswer: null
+  };
 }
-
+let S_WordGame = await loadWordGameState();
 function processWordGame(message, args) {
   if(!S_WordGame.currentWord) {
-    const wordLength = parseInt(args[0] || 5);
-    const selectedWords = WordGameWords.filter(w => w.length === wordLength);
-    if(!selectedWords.length) {
-      message.reply(`En tiedä tuon pitusia sanoja..`)
+    if(parseInt(args[0]).toString() !== args[0]) {
+      message.reply('Sanasolmu ei ole käynnissä. Koita `!s-uus`');
       return;
     }
-    S_WordGame.currentAnswer = _.sample(selectedWords);
-    S_WordGame.currentWord = _.shuffle([...S_WordGame.currentAnswer]).join('').toUpperCase();
-    message.reply(`Uusi sanasolmu: ${ S_WordGame.currentWord }`);
+    getNewWord(message, args);
     return;
   }
   else if(args.length === 0) {
-    message.reply(`Sanasolmu: ${ S_WordGame.currentWord }`);
+    showCurrentWord(message);
     return;
   }
+  checkWord(message,args);
+}
+function getNewWord(message, args) {
+  const wordLength = parseInt(args[0] || (S_WordGame.currentWord || '     ').length);
+  const selectedWords = WordGameWords.filter(w => w.length === wordLength);
+  if(!selectedWords.length) {
+    message.reply(`En tiedä tuon pitusia sanoja..`)
+    return;
+  }
+  S_WordGame.currentAnswer = _.sample(selectedWords);
+  S_WordGame.currentWord = _.shuffle([...S_WordGame.currentAnswer]).join('').toUpperCase();
+  Storage.setItem('WordGame_State', S_WordGame);
+  message.reply(`Uusi sanasolmu: ${ S_WordGame.currentWord }`);
+}
+function showCurrentWord(message) {
+  message.reply(`Sanasolmu: ${ S_WordGame.currentWord }`);
+}
+function checkWord(message, args) {
   if(args[0].toUpperCase() === S_WordGame.currentAnswer.toUpperCase()) {
     addWordgamePoint(message.author);
     const currentPoints = getWordgamePoints(message.author);
     message.reply(`Oikein! Sinulla on ${ currentPoints } piste${ currentPoints > 1 ? 'ttä' : ''}.`);
+    getNewWord(message, [S_WordGame.currentWord.length]);
+  }
+}
+function resetWordGame(message, args) {
+  if(S_WordGame.currentWord) {
+    message.reply(`Sana oli ${ S_WordGame.currentAnswer}. https://fi.wiktionary.org/w/index.php?title=${ S_WordGame.currentAnswer }`)
     S_WordGame.currentWord = null;
     S_WordGame.currentAnswer = null;
-    return;
+    Storage.setItem('WordGame_State', S_WordGame);
   }
+  getNewWord(message, args);
 }
 
 async function loadWordGameHiscores() {
   return await Storage.getItem('WordGame_HiScores') || {};
 }
-
 const HS_WordGame = await loadWordGameHiscores();
-
 async function addWordgamePoint(author) {
   const { username } = author;
   if(!HS_WordGame[username]) {
@@ -156,6 +169,17 @@ function processWordGamePoints(message, [username] = []) {
   }
   const result = Object.entries(HS_WordGame).map(([user,points]) => `${ user }: ${ points }`).join('\n');
   message.reply(result);
+}
+
+
+
+
+function processChatter(message) {
+  if(typeof message.content === 'string' && message.content.includes('perjantai')) {
+    message.reply('PeRjAnTaIiIiI!!! :tada:');
+    return true;
+  }
+  return false;
 }
 
 client.login(process.env.TOKEN);
