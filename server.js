@@ -1,33 +1,33 @@
 require('dotenv').config();
 const _ = require('lodash');
 const Storage = require('node-persist');
+const Discord = require('discord.js');
+const { random, floor } = Math;
+
+const CatPics = require('./modules/catpics.js');
 
 (async function() {
 
 await Storage.init();
 
-const { random, floor, round } = Math;
-
-const Discord = require('discord.js');
-const client = new Discord.Client();
-client.on('ready', () => {
-  console.log(`Logged in as ${client.user.tag}`);
-});
-
-const roll7 = require('./modules/roll7.js');
-
 const commands = [
-  { fn: roll7, triggers: ['heitä7', '7'], title: 'Heitä 7 noppaa, pienin summa voittaa!' },
+  { fn: require('./modules/roll7.js'), triggers: ['heitä7', '7'], title: 'Heitä 7 noppaa, pienin summa voittaa!' },
   { fn: throwDice, triggers: ['noppa','n'], title: 'Heitä noppaa. Esim. `!noppa 12` arpoo luvun 1 ja 12 väliltä.' },
   { fn: chooseOne, triggers: ['kumpi','k'], title: 'Valitse yksi. Esim. `!kumpi kissat vai koirat`.' },
   { fn: processWordGame, triggers: ['solmu','s'], title: 'Pelaa sanasolmua. Esim. `!solmu arvaus`' },
   { fn: processWordGamePoints, triggers: ['solmu-pisteet','s-pts'], title: 'Näytä sanasolmun pisteet.' },
   { fn: resetWordGame, triggers: ['solmu-uusi','s-uus'], title: 'Skippaa nykyinen sana (maksaa 10 pistettä)' },
   { fn: defineWordGameWord, triggers: ['sanakirja', 'sk'], title: 'Etsi sana wiktionarysta' },
-  { fn: processZalgo, triggers: ['z', 'zalgo'], title: 'Zalgo' },
+  { fn: processZalgo, triggers: ['z'] },
+  { fn: CatPics.randomCatPic, triggers: ['kuva'], title: 'Satunnainen kissakuva' },
   { fn: processReact, triggers: ['react'] },
   { fn: showHelp, triggers: ['apua'], title: 'Näyttää toiminnot' }
 ];
+
+const client = new Discord.Client();
+client.on('ready', () => {
+  console.log(`Logged in as ${client.user.tag}`);
+});
 
 client.on('message', message => {
   if(processChatter(message)) return;
