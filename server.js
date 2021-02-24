@@ -21,7 +21,7 @@ const commands = [
   { fn: processWordGame, triggers: ['solmu','s'], title: 'Pelaa sanasolmua. Esim. `!solmu arvaus`' },
   { fn: processWordGamePoints, triggers: ['solmu-pisteet','s-pts'], title: 'Näytä sanasolmun pisteet.' },
   { fn: defineWordGameWord, triggers: ['solmu-wtf', 's-wat'], title: 'Etsi sana wiktionarysta' },
-  { fn: resetWordGame, triggers: ['solmu-uusi','s-uus'], title: 'Skippaa nykyinen sana (maksaa yhden pisteen)' },
+  { fn: resetWordGame, triggers: ['solmu-uusi','s-uus'], title: 'Skippaa nykyinen sana (maksaa 10 pistettä)' },
   { fn: processZalgo, triggers: ['z', 'zalgo'], title: 'Zalgo' },
   { fn: showHelp, triggers: ['apua'], title: 'Näyttää toiminnot' }
 ];
@@ -154,7 +154,7 @@ function resetWordGame(message, args) {
       HS_WordGame[message.author.username] -= 10;
       Storage.setItem('WordGame_HiScores', HS_WordGame);
     } else {
-      message.reply(`Tarvitset ainakin yhden pisteen ohittaaksesi sanan.`)
+      message.reply(`Sanan ohittaminen maksaa 10 pistettä, sulla on vain ${ userPoints }`);
       return;
     }
   }
