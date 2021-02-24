@@ -172,6 +172,8 @@ function checkWord(message, args) {
     [...S_WordGame.currentAnswer.toUpperCase()].sort().join('');
   if(sameLetters) {
     WordGame_Attempts = (WordGame_Attempts || 0) + 1;
+  } else {
+    message.react('🙄');
   }
   console.log(`Attempts: ${ WordGame_Attempts }`);
 }
