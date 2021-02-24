@@ -230,6 +230,11 @@ function processChatter(message) {
     message.reply('PeRjAnTaIiIiI!!! :tada:');
     return true;
   }
+  if(
+    message.content.match(/kissa|katti|mirri|kiisseli/)
+  ) {
+    message.react('🐈');
+  }
   return false;
 }
 
