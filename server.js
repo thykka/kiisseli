@@ -131,7 +131,10 @@ function processWordGame(message, args) {
 // ephemeral than the other stuff, so this will do for now..
 let WordGame_Attempts = 0;
 function getNewWord(message, args) {
-  const wordLength = parseInt(args[0] || (S_WordGame.currentWord || '     ').length);
+  const wordLength = typeof args === 'number' ? args
+    : Array.isArray(args) && typeof args[0] === 'string' ? parseInt(args[0])
+    : S_WordGame.currentWord ? S_WordGame.currentWord.length
+    : 6;
   const selectedWords = WordGameWords.filter(w => w.length === wordLength);
   if(!selectedWords.length) {
     message.reply(`En tiedä tuon pitusia sanoja..`)
@@ -159,7 +162,7 @@ function checkWord(message, args) {
     if(WordGame_Attempts > 2) {
       defineWordGameWord(message, [S_WordGame.currentAnswer]);
     }
-    getNewWord(message, [S_WordGame.currentWord.length]);
+    getNewWord(message);
     return;
   }
   // check if attempted word has at least the same letters
@@ -176,12 +179,9 @@ function resetWordGame(message, args) {
     if(userPoints >= 10) {
       message.channel.send(`Sana oli ${ S_WordGame.currentAnswer}.`);
       defineWordGameWord(message, [S_WordGame.currentAnswer]);
-      S_WordGame.currentWord = null;
-      S_WordGame.currentAnswer = null;
-      Storage.setItem('WordGame_State', S_WordGame);
       HS_WordGame[message.author.username] -= 10;
       Storage.setItem('WordGame_HiScores', HS_WordGame);
-    } else {
+    } else { // exit early, user doesn't have enough points
       message.reply(`Sanan ohittaminen maksaa 10 pistettä, sulla on vain ${ userPoints }`);
       return;
     }
