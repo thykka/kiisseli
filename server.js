@@ -20,8 +20,8 @@ const commands = [
   { fn: chooseOne, triggers: ['kumpi','k'], title: 'Valitse yksi. Esim. `!kumpi kissat vai koirat`.' },
   { fn: processWordGame, triggers: ['solmu','s'], title: 'Pelaa sanasolmua. Esim. `!solmu arvaus`' },
   { fn: processWordGamePoints, triggers: ['solmu-pisteet','s-pts'], title: 'Näytä sanasolmun pisteet.' },
-  { fn: defineWordGameWord, triggers: ['solmu-wtf', 's-wat'], title: 'Etsi sana wiktionarysta' },
   { fn: resetWordGame, triggers: ['solmu-uusi','s-uus'], title: 'Skippaa nykyinen sana (maksaa 10 pistettä)' },
+  { fn: defineWordGameWord, triggers: ['sanakirja', 'sk'], title: 'Etsi sana wiktionarysta' },
   { fn: processZalgo, triggers: ['z', 'zalgo'], title: 'Zalgo' },
   { fn: showHelp, triggers: ['apua'], title: 'Näyttää toiminnot' }
 ];
@@ -166,7 +166,8 @@ function resetWordGame(message, args) {
   const userPoints = HS_WordGame[message.author.username];
   if(S_WordGame.currentWord){
     if(userPoints >= 10) {
-      message.reply(`Sana oli ${ S_WordGame.currentAnswer}.`)
+      message.reply(`Sana oli ${ S_WordGame.currentAnswer}.`);
+      defineWordGameWord(message, [S_WordGame.currentWord]);
       S_WordGame.currentWord = null;
       S_WordGame.currentAnswer = null;
       Storage.setItem('WordGame_State', S_WordGame);
