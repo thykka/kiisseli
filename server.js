@@ -35,6 +35,8 @@ client.on('message', message => {
   );
 });
 
+client.login(process.env.TOKEN);
+
 function extractCommand(text) {
   const parts = text.substring(1).split(/\s/g);
   return {
@@ -95,7 +97,7 @@ function chooseOne(message, args) {
   message.reply(`${ prefix } ${ choice }${ suffix }`);
 }
 
-const WordGameWords = require('./wordgame-words.js');
+const WordGameWords = require('./wordgame-words-big.js');
 
 async function loadWordGameState() {
   return await Storage.getItem('WordGame_State') || {
@@ -216,9 +218,6 @@ const Zalgo = require('to-zalgo');
 function processZalgo(message, args) {
   message.reply(Zalgo(args.join(' ')));
 }
-
-client.login(process.env.TOKEN);
-
 /*
 client.generateInvite({
   permissions: ['SEND_MESSAGES', 'MANAGE_GUILD', 'MENTION_EVERYONE'],
