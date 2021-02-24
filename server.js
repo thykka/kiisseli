@@ -223,12 +223,16 @@ async function loadRoll7State() {
 }
 let S_Roll7 = await loadRoll7State();
 
-async function processRoll7(message) {
+async function processRoll7(message, args) {
+  const best = S_Roll7;
+  if(['paras', 'top'].includes(args[0])) {
+    message.channel.send(`Paras heitto: ${best}`)
+    return;
+  }
   const roll = () => floor(Math.random()*6)+1;
   const dice = Array.from({ length: 7 }, roll);
   const total = dice.reduce((a,d) => a+d, 0);
   const formattedDice = dice.map(d => formatDice(d)).join(' ');
-  const best = S_Roll7;
   if(total < best) {
     S_Roll7 = total;
     await Storage.setItem('Roll7_Best', S_Roll7);
