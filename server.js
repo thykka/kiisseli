@@ -15,11 +15,14 @@ client.on('ready', () => {
 });
 
 const commands = [
+  { fn: processRoll7, triggers: ['heitä7', '7'], title: 'Heitä 7 noppaa, pienin summa voittaa!' },
   { fn: throwDice, triggers: ['noppa','n'], title: 'Heitä noppaa. Esim. `!noppa 12` arpoo luvun 1 ja 12 väliltä.' },
   { fn: chooseOne, triggers: ['kumpi','k'], title: 'Valitse yksi. Esim. `!kumpi kissat vai koirat`.' },
   { fn: processWordGame, triggers: ['solmu','s'], title: 'Pelaa sanasolmua. Esim. `!solmu arvaus`' },
   { fn: processWordGamePoints, triggers: ['solmu-pisteet','s-pts'], title: 'Näytä sanasolmun pisteet.' },
+  { fn: defineWordGameWord, triggers: ['solmu-wtf', 's-wat'], title: 'Etsi sana wiktionarysta' },
   { fn: resetWordGame, triggers: ['solmu-uusi','s-uus'], title: 'Skippaa nykyinen sana' },
+  { fn: processZalgo, triggers: ['z', 'zalgo'], title: 'Zalgo' },
   { fn: showHelp, triggers: ['apua'], title: 'Näyttää toiminnot' }
 ];
 
@@ -63,11 +66,13 @@ function throwDice(message, args) {
   }
   const result = floor(random() * sides + 1);
   if(sides === 6) {
-    const dieChar = '⚀⚁⚂⚃⚄⚅'[result-1];
-    message.reply(`heitit noppaa: ${ dieChar }`)
+    message.reply(`heitit noppaa: ${ formatDice(result) }`)
     return;
   }
   message.reply(`heitit ${ sides }-sivuista noppaa, sait: ${result}.`);
+}
+function formatDice(result) {
+  return '⚀⚁⚂⚃⚄⚅'[result-1];
 }
 
 const choosePrefixes = [
@@ -145,6 +150,9 @@ function resetWordGame(message, args) {
   }
   getNewWord(message, args);
 }
+function defineWordGameWord(message, args) {
+  message.reply(`https://fi.wiktionary.org/w/index.php?title=${ args.join(' ') }`);
+}
 
 async function loadWordGameHiscores() {
   return await Storage.getItem('WordGame_HiScores') || {};
@@ -171,7 +179,29 @@ function processWordGamePoints(message, [username] = []) {
   message.reply(result);
 }
 
+async function loadRoll7State() {
+  const savedState = await Storage.getItem('Roll7_Best');
+  return savedState || Infinity;
+}
+let S_Roll7 = await loadRoll7State();
 
+async function processRoll7(message) {
+  const roll = () => floor(Math.random()*6)+1;
+  const dice = Array.from({ length: 7 }, roll);
+  const total = dice.reduce((a,d) => a+d, 0);
+  const formattedDice = dice.map(d => formatDice(d)).join(' ');
+  const best = S_Roll7;
+  if(total < best) {
+    S_Roll7 = total;
+    await Storage.setItem('Roll7_Best', S_Roll7);
+    message.reply(`Heitit ${formattedDice} (${total}) - Uusi ennätys!`);
+  } else {
+    message.reply(`Heitit ${formattedDice} (${total})`);
+  }
+  if (total === 7) {
+    message.reply(`Heitit ${formattedDice} (${total}) - Se siitä sitten, voitit pelin!`)
+  }
+}
 
 
 function processChatter(message) {
@@ -180,6 +210,11 @@ function processChatter(message) {
     return true;
   }
   return false;
+}
+
+const Zalgo = require('to-zalgo');
+function processZalgo(message, args) {
+  message.reply(Zalgo(args.join(' ')));
 }
 
 client.login(process.env.TOKEN);

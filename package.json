@@ -12,6 +12,7 @@
     "discord.js": "^12.5.1",
     "dotenv": "^8.2.0",
     "lodash": "^4.17.21",
-    "node-persist": "^3.1.0"
+    "node-persist": "^3.1.0",
+    "to-zalgo": "^1.0.1"
   }
 }
