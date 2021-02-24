@@ -57,7 +57,7 @@ function showHelp(message) {
   const result = commands.filter(c => c.title && !c.hidden)
     .map(c => `\`!${ c.triggers[0] }\` - ${ c.title }\n`)
     .join('');
-  message.reply(result);
+  message.reply('\n' + result);
 }
 
 function processCommand({type, args}, message) {
@@ -239,7 +239,15 @@ function processWordGamePoints(message, [username] = []) {
 }
 
 function processChatter(message) {
-  if(typeof message.content === 'string' && message.content.includes('perjantai')) {
+  // don't react to self, potential endless loop
+  if(message.author.equals(client.user)) return;
+
+  if(
+    typeof message.content === 'string' && (
+      message.content.includes('perjantai') ||
+      message.content.includes('tgif')
+    )
+  ) {
     message.reply('PeRjAnTaIiIiI!!! :tada:');
     return true;
   }
