@@ -21,7 +21,7 @@ const commands = [
   { fn: processWordGame, triggers: ['solmu','s'], title: 'Pelaa sanasolmua. Esim. `!solmu arvaus`' },
   { fn: processWordGamePoints, triggers: ['solmu-pisteet','s-pts'], title: 'Näytä sanasolmun pisteet.' },
   { fn: defineWordGameWord, triggers: ['solmu-wtf', 's-wat'], title: 'Etsi sana wiktionarysta' },
-  { fn: resetWordGame, triggers: ['solmu-uusi','s-uus'], title: 'Skippaa nykyinen sana' },
+  { fn: resetWordGame, triggers: ['solmu-uusi','s-uus'], title: 'Skippaa nykyinen sana (maksaa yhden pisteen)' },
   { fn: processZalgo, triggers: ['z', 'zalgo'], title: 'Zalgo' },
   { fn: showHelp, triggers: ['apua'], title: 'Näyttää toiminnot' }
 ];
@@ -144,11 +144,19 @@ function checkWord(message, args) {
   }
 }
 function resetWordGame(message, args) {
-  if(S_WordGame.currentWord) {
-    message.reply(`Sana oli ${ S_WordGame.currentAnswer}. https://fi.wiktionary.org/w/index.php?title=${ S_WordGame.currentAnswer }`)
-    S_WordGame.currentWord = null;
-    S_WordGame.currentAnswer = null;
-    Storage.setItem('WordGame_State', S_WordGame);
+  const userPoints = HS_WordGame[message.author.username];
+  if(S_WordGame.currentWord){
+    if(userPoints > 0) {
+      message.reply(`Sana oli ${ S_WordGame.currentAnswer}.`)
+      S_WordGame.currentWord = null;
+      S_WordGame.currentAnswer = null;
+      Storage.setItem('WordGame_State', S_WordGame);
+      HS_WordGame[message.author.username] -= 1;
+      Storage.setItem('WordGame_HiScores', HS_WordGame);
+    } else {
+      message.reply(`Tarvitset ainakin yhden pisteen ohittaaksesi sanan.`)
+      return;
+    }
   }
   getNewWord(message, args);
 }
