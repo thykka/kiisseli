@@ -23,6 +23,7 @@ const commands = [
   { fn: resetWordGame, triggers: ['solmu-uusi','s-uus'], title: 'Skippaa nykyinen sana (maksaa 10 pistettä)' },
   { fn: defineWordGameWord, triggers: ['sanakirja', 'sk'], title: 'Etsi sana wiktionarysta' },
   { fn: processZalgo, triggers: ['z', 'zalgo'], title: 'Zalgo' },
+  { fn: processReact, triggers: ['react'] },
   { fn: showHelp, triggers: ['apua'], title: 'Näyttää toiminnot' }
 ];
 
@@ -45,8 +46,12 @@ function extractCommand(text) {
   };
 }
 
+function processReact(message, args) {
+  // TODO
+}
+
 function showHelp(message, args) {
-  const result = commands.filter(c=>!c.hidden).map(c => c.triggers.map(t => '`!'+t+'`').join(',') + ' - ' + c.title).join('\n');
+  const result = commands.filter(c=>c.title && !c.hidden).map(c => c.triggers.map(t => '`!'+t+'`').join(',') + ' - ' + c.title).join('\n');
   message.reply(result);
 }
 
@@ -134,12 +139,15 @@ function getNewWord(message, args) {
   }
   WordGame_Attempts = 0;
   S_WordGame.currentAnswer = _.sample(selectedWords);
-  S_WordGame.currentWord = _.shuffle([...S_WordGame.currentAnswer]).join('').toUpperCase();
+  do {
+    S_WordGame.currentWord = _.shuffle([...S_WordGame.currentAnswer]).join('').toUpperCase();
+  } while (S_WordGame.currentWord !== S_WordGame.currentWord.toUpperCase())
+
   Storage.setItem('WordGame_State', S_WordGame);
-  message.reply(`Uusi sanasolmu: ${ S_WordGame.currentWord }`);
+  message.channel.send(`Uusi sanasolmu: ${ S_WordGame.currentWord }`);
 }
 function showCurrentWord(message) {
-  message.reply(`Sanasolmu: ${ S_WordGame.currentWord }`);
+  message.channel.send(`Sanasolmu: ${ S_WordGame.currentWord }`);
 }
 
 function checkWord(message, args) {
@@ -166,7 +174,7 @@ function resetWordGame(message, args) {
   const userPoints = HS_WordGame[message.author.username];
   if(S_WordGame.currentWord){
     if(userPoints >= 10) {
-      message.reply(`Sana oli ${ S_WordGame.currentAnswer}.`);
+      message.channel.send(`Sana oli ${ S_WordGame.currentAnswer}.`);
       defineWordGameWord(message, [S_WordGame.currentAnswer]);
       S_WordGame.currentWord = null;
       S_WordGame.currentAnswer = null;
@@ -181,7 +189,7 @@ function resetWordGame(message, args) {
   getNewWord(message, args);
 }
 function defineWordGameWord(message, args) {
-  message.reply(`https://fi.wiktionary.org/w/index.php?title=${ args.join(' ') }`);
+  message.channel.send(`https://fi.wiktionary.org/w/index.php?title=${ args.join(' ') }`);
 }
 
 async function loadWordGameHiscores() {
