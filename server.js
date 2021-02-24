@@ -159,6 +159,7 @@ function checkWord(message, args) {
   if(args[0].toUpperCase() === S_WordGame.currentAnswer.toUpperCase()) {
     addWordgamePoint(message.author);
     const currentPoints = getWordgamePoints(message.author);
+    message.react('😻');
     message.reply(`Oikein! Sinulla on ${ currentPoints } piste${ currentPoints > 1 ? 'ttä' : ''}.`);
     // show definition, if word was difficult
     if(WordGame_Attempts > 2) {
@@ -172,8 +173,10 @@ function checkWord(message, args) {
     [...S_WordGame.currentAnswer.toUpperCase()].sort().join('');
   if(sameLetters) {
     WordGame_Attempts = (WordGame_Attempts || 0) + 1;
+    message.react('😸');
   } else {
-    message.react('🙄');
+    const emoji = message.guild.emojis.cache.find(emoji => emoji.name === 'derpcat');
+    message.react(emoji);
   }
   console.log(`Attempts: ${ WordGame_Attempts }`);
 }
