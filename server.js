@@ -146,12 +146,12 @@ function checkWord(message, args) {
 function resetWordGame(message, args) {
   const userPoints = HS_WordGame[message.author.username];
   if(S_WordGame.currentWord){
-    if(userPoints > 0) {
+    if(userPoints >= 10) {
       message.reply(`Sana oli ${ S_WordGame.currentAnswer}.`)
       S_WordGame.currentWord = null;
       S_WordGame.currentAnswer = null;
       Storage.setItem('WordGame_State', S_WordGame);
-      HS_WordGame[message.author.username] -= 1;
+      HS_WordGame[message.author.username] -= 10;
       Storage.setItem('WordGame_HiScores', HS_WordGame);
     } else {
       message.reply(`Tarvitset ainakin yhden pisteen ohittaaksesi sanan.`)
