@@ -120,6 +120,11 @@ function processWordGame(message, args) {
   }
   checkWord(message,args);
 }
+
+// This counts each successful attempt at guessing the word
+// Should probably be saved in storage too, but it's more
+// ephemeral than the other stuff, so this will do for now..
+let WordGame_Attempts = 0;
 function getNewWord(message, args) {
   const wordLength = parseInt(args[0] || (S_WordGame.currentWord || '     ').length);
   const selectedWords = WordGameWords.filter(w => w.length === wordLength);
@@ -127,6 +132,7 @@ function getNewWord(message, args) {
     message.reply(`En tiedä tuon pitusia sanoja..`)
     return;
   }
+  WordGame_Attempts = 0;
   S_WordGame.currentAnswer = _.sample(selectedWords);
   S_WordGame.currentWord = _.shuffle([...S_WordGame.currentAnswer]).join('').toUpperCase();
   Storage.setItem('WordGame_State', S_WordGame);
@@ -135,13 +141,26 @@ function getNewWord(message, args) {
 function showCurrentWord(message) {
   message.reply(`Sanasolmu: ${ S_WordGame.currentWord }`);
 }
+
 function checkWord(message, args) {
   if(args[0].toUpperCase() === S_WordGame.currentAnswer.toUpperCase()) {
     addWordgamePoint(message.author);
     const currentPoints = getWordgamePoints(message.author);
     message.reply(`Oikein! Sinulla on ${ currentPoints } piste${ currentPoints > 1 ? 'ttä' : ''}.`);
+    // show definition, if word was difficult
+    if(WordGame_Attempts > 2) {
+      defineWordGameWord(message, args);
+    }
     getNewWord(message, [S_WordGame.currentWord.length]);
+    return;
   }
+  // check if attempted word has at least the same letters
+  const sameLetters= [...args[0].toUpperCase()].sort().join('') ===
+    [...S_WordGame.currentAnswer.toUpperCase()].sort().join('');
+  if(sameLetters) {
+    WordGame_Attempts = (WordGame_Attempts || 0) + 1;
+  }
+  console.log(`Attempts: ${ WordGame_Attempts }`);
 }
 function resetWordGame(message, args) {
   const userPoints = HS_WordGame[message.author.username];
