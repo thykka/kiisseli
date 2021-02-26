@@ -147,6 +147,11 @@ function processWordGame(message, args) {
 // ephemeral than the other stuff, so this will do for now..
 let WordGame_Attempts = 0;
 const WordGame_difficulty = 0.2;
+/*
+// TODO: Split this to getNewWord and sayNewWord or something,
+//  because rn it's possible that getting a word fails, and
+//  we need to not subtract points from skips when it happens.
+*/
 function getNewWord(message, args) {
   const customLength = typeof args === 'number' ? args
     : Array.isArray(args) && typeof args[0] === 'string' && parseInt(args[0])
