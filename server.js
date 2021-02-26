@@ -159,7 +159,7 @@ function getNewWord(message, args) {
   
   const wordLength = customLength || floor(
     // random between 4 and 10, biased towards shorter words
-    4 + random() * random() * random() * 6 + WordGame_difficulty
+    5 + random() * random() * random() * 5 + WordGame_difficulty
   );
 
   const selectedWords = WordGameWords.filter(w => w.length === wordLength);
