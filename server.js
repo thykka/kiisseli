@@ -6,7 +6,7 @@ const { random, floor } = Math;
 
 const CatPics = require('./modules/catpics.js');
 
-const WordGame_PointCost = 15;
+const WordGame_PointCost = 8;
 
 (async function() {
 
@@ -184,7 +184,7 @@ function showCurrentWord(message) {
 
 function checkWord(message, args) {
   if(args[0].toUpperCase() === S_WordGame.currentAnswer.toUpperCase()) {
-    addWordgamePoints(message.author, S_WordGame.currentAnswer.length);
+    addWordgamePoints(message.author, S_WordGame.currentAnswer.length - 3);
     const currentPoints = getWordgamePoints(message.author);
     message.react('🥇');
     message.reply(`Oikein! Sinulla on ${ currentPoints } piste${ currentPoints > 1 ? 'ttä' : ''}.`);
