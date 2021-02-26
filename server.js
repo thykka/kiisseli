@@ -259,7 +259,7 @@ function processWordGamePoints(message, [username] = []) {
 function processChatter(message) {
   // don't react to self, potential endless loop
   if(message.author.equals(client.user)) return;
-
+  /*
   if(
     typeof message.content === 'string' && (
       message.content.includes('perjantai') ||
@@ -269,6 +269,7 @@ function processChatter(message) {
     message.reply('PeRjAnTaIiIiI!!! :tada:');
     return true;
   }
+  */
   if(
     message.content.match(/kissa|katti|mirri|kiisseli/)
   ) {
