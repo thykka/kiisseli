@@ -247,7 +247,7 @@ function processWordGamePoints(message, [username] = []) {
     .sort(([_,aPoints],[__,bPoints]) => bPoints - aPoints)
     .map(([user,points]) => `${ 'l'.repeat(points/10) } ${ user }: ${ points }`)
     .join('\n');
-  message.reply('.\n' + result);
+  message.channel.send('.\n' + result);
 }
 
 function processChatter(message) {
