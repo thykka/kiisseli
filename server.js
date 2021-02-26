@@ -21,6 +21,7 @@ const commands = [
   { fn: resetWordGame, triggers: ['solmu-uusi','s-uus'], title: `Skippaa nykyinen sana (maksaa ${WordGame_PointCost} pistettä)` },
   { fn: defineWordGameWord, triggers: ['sanakirja', 'sk'], title: 'Etsi sana wiktionarysta' },
   { fn: CatPics.randomCatPic, triggers: ['kuva'], title: 'Satunnainen kissakuva' },
+  { fn: processIsIt, triggers: ['onko'], title: 'Kysy jotain, vastaan jotain. ehkä.' },
   { fn: processReact, triggers: ['react'] },
   { fn: require('./modules/zalgo.js'), triggers: ['z'] },
   { fn: showHelp, triggers: ['apua','halp','help','apuva','komennot','commands'], title: 'Näyttää toiminnot' }
@@ -274,6 +275,17 @@ function processChatter(message) {
     message.react('🐈');
   }
   return false;
+}
+
+function processIsIt(message, args) {
+  if(args[0].match(/perjantai\??/i)) {
+    const now = new Date();
+    if(now.getDate() === 5) {
+      message.reply('ON!');
+    } else {
+      message.reply('Ei...');
+    }
+  }
 }
 
 /*
