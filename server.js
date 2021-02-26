@@ -217,7 +217,7 @@ function resetWordGame(message, args) {
   getNewWord(message, args);
 }
 function defineWordGameWord(message, args) {
-  message.channel.send(`https://en.wiktionary.org/wiki/${ args.join(' ') }`);
+  message.channel.send(`https://en.wiktionary.org/wiki/${ args.join(' ') }#Finnish`);
 }
 
 async function loadWordGameHiscores() {
