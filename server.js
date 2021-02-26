@@ -243,8 +243,10 @@ function processWordGamePoints(message, [username] = []) {
     message.reply(`Käyttäjän ${username} pisteet: ${ HS_WordGame[username] }`);
     return;
   }
-  const result = Object.entries(HS_WordGame).map(([user,points]) => `${ user }: ${ points }`).join('\n');
-  message.reply(result);
+  const result = Object.entries(HS_WordGame)
+    .map(([user,points]) => `${ user }: ${ '|'.repeat(points/10) } (${ points })`)
+    .join('\n');
+  message.reply('.\n' + result);
 }
 
 function processChatter(message) {
