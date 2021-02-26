@@ -167,7 +167,7 @@ function getNewWord(message, args) {
   do {
     S_WordGame.currentWord = _.shuffle([...S_WordGame.currentAnswer]).join('').toUpperCase();
     tries++;
-  } while (S_WordGame.currentWord !== S_WordGame.currentAnswer.toUpperCase() || tries < 100)
+  } while (S_WordGame.currentWord === S_WordGame.currentAnswer.toUpperCase() || tries < 100)
 
   Storage.setItem('WordGame_State', S_WordGame);
   message.channel.send(`Uusi sanasolmu: ${ S_WordGame.currentWord }`);
