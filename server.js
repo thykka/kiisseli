@@ -244,7 +244,7 @@ function processWordGamePoints(message, [username] = []) {
     return;
   }
   const result = Object.entries(HS_WordGame)
-    .sort((a,b) => b.points - a.points)
+    .sort(([_,aPoints],[__,bPoints]) => bPoints - aPoints)
     .map(([user,points]) => `${ 'l'.repeat(points/10) } ${ user }: ${ points }`)
     .join('\n');
   message.reply('.\n' + result);
