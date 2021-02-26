@@ -6,6 +6,8 @@ const { random, floor } = Math;
 
 const CatPics = require('./modules/catpics.js');
 
+const WordGame_PointCost = 15;
+
 (async function() {
 
 await Storage.init();
@@ -16,7 +18,7 @@ const commands = [
   { fn: chooseOne, triggers: ['kumpi','k'], title: 'Valitse yksi. Esim. `!kumpi kissat vai koirat`.' },
   { fn: processWordGame, triggers: ['solmu','s'], title: 'Pelaa sanasolmua. Esim. `!solmu arvaus`' },
   { fn: processWordGamePoints, triggers: ['solmu-pisteet','s-pts'], title: 'Näytä sanasolmun pisteet.' },
-  { fn: resetWordGame, triggers: ['solmu-uusi','s-uus'], title: 'Skippaa nykyinen sana (maksaa 10 pistettä)' },
+  { fn: resetWordGame, triggers: ['solmu-uusi','s-uus'], title: `Skippaa nykyinen sana (maksaa ${WordGame_PointCost} pistettä)` },
   { fn: defineWordGameWord, triggers: ['sanakirja', 'sk'], title: 'Etsi sana wiktionarysta' },
   { fn: CatPics.randomCatPic, triggers: ['kuva'], title: 'Satunnainen kissakuva' },
   { fn: processReact, triggers: ['react'] },
@@ -144,14 +146,19 @@ function processWordGame(message, args) {
 // Should probably be saved in storage too, but it's more
 // ephemeral than the other stuff, so this will do for now..
 let WordGame_Attempts = 0;
+const WordGame_difficulty = 0.2;
 function getNewWord(message, args) {
-  const wordLength = typeof args === 'number' ? args
-    : Array.isArray(args) && typeof args[0] === 'string' ? parseInt(args[0])
-    : S_WordGame.currentWord ? S_WordGame.currentWord.length
-    : 6;
+  const customLength = typeof args === 'number' ? args
+    : Array.isArray(args) && typeof args[0] === 'string' && parseInt(args[0])
+  
+  const wordLength = customLength || floor(
+    // random between 4 and 10, biased towards shorter words
+    4 + random() * random() * random() * 6 + WordGame_difficulty
+  );
+
   const selectedWords = WordGameWords.filter(w => w.length === wordLength);
-  if(!selectedWords.length) {
-    message.reply(`En tiedä tuon pitusia sanoja..`)
+  if(selectedWords.length < 10) {
+    message.reply(`En tiedä tarpeeksi ${ wordLength }-kirjaimisia sanoja..`)
     return;
   }
   WordGame_Attempts = 0;
@@ -170,12 +177,12 @@ function showCurrentWord(message) {
 
 function checkWord(message, args) {
   if(args[0].toUpperCase() === S_WordGame.currentAnswer.toUpperCase()) {
-    addWordgamePoint(message.author);
+    addWordgamePoints(message.author, S_WordGame.currentAnswer.length);
     const currentPoints = getWordgamePoints(message.author);
     message.react('🥇');
     message.reply(`Oikein! Sinulla on ${ currentPoints } piste${ currentPoints > 1 ? 'ttä' : ''}.`);
     // show definition, if word was difficult
-    if(WordGame_Attempts > 2) {
+    if(WordGame_Attempts > 4) {
       message.react('😻');
       defineWordGameWord(message, [S_WordGame.currentAnswer]);
     }
@@ -197,32 +204,32 @@ function checkWord(message, args) {
 function resetWordGame(message, args) {
   const userPoints = HS_WordGame[message.author.username];
   if(S_WordGame.currentWord){
-    if(userPoints >= 10) {
+    if(userPoints >= WordGame_PointCost) {
       message.channel.send(`Sana oli ${ S_WordGame.currentAnswer}.`);
       defineWordGameWord(message, [S_WordGame.currentAnswer]);
-      HS_WordGame[message.author.username] -= 10;
+      HS_WordGame[message.author.username] -= WordGame_PointCost;
       Storage.setItem('WordGame_HiScores', HS_WordGame);
     } else { // exit early, user doesn't have enough points
-      message.reply(`Sanan ohittaminen maksaa 10 pistettä, sulla on vain ${ userPoints }`);
+      message.reply(`Sanan ohittaminen maksaa ${ WordGame_PointCost } pistettä, sulla on vain ${ userPoints }`);
       return;
     }
   }
   getNewWord(message, args);
 }
 function defineWordGameWord(message, args) {
-  message.channel.send(`https://fi.wiktionary.org/w/index.php?title=${ args.join(' ') }`);
+  message.channel.send(`https://en.wiktionary.org/wiki/${ args.join(' ') }`);
 }
 
 async function loadWordGameHiscores() {
   return await Storage.getItem('WordGame_HiScores') || {};
 }
 const HS_WordGame = await loadWordGameHiscores();
-async function addWordgamePoint(author) {
+async function addWordgamePoints(author, amount = 1) {
   const { username } = author;
   if(!HS_WordGame[username]) {
     HS_WordGame[username] = 0;
   }
-  HS_WordGame[username] += 1;
+  HS_WordGame[username] += amount;
   await Storage.setItem('WordGame_HiScores', HS_WordGame);
 }
 function getWordgamePoints(author) {
