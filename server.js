@@ -259,9 +259,9 @@ function processWordGamePoints(message, [username] = []) {
 function processWordGameHint(message) {
   const hintIndex = floor(random() * S_WordGame.currentAnswer.length);
   const hint = [...S_WordGame.currentAnswer].map((letter,index) => {
-    return index === hintIndex ? letter : '\_'
+    return index === hintIndex ? letter : '\\_'
   }).join(' ');
-  message.reply(hint);
+  message.channel.send(`${hint}`);
 }
 
 function processChatter(message) {
