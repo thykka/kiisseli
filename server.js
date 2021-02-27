@@ -6,7 +6,8 @@ const { random, floor } = Math;
 
 const CatPics = require('./modules/catpics.js');
 
-const WordGame_PointCost = 8;
+const WordGame_SkipCost = 12;
+const WordGame_HintCost = 4;
 
 (async function() {
 
@@ -19,7 +20,7 @@ const commands = [
   { fn: processWordGame, triggers: ['solmu','s'], title: 'Pelaa sanasolmua. Esim. `!solmu arvaus`' },
   { fn: processWordGamePoints, triggers: ['solmu-pisteet','s-pts'], title: 'Näytä sanasolmun pisteet' },
   { fn: processWordGameHint, triggers: ['solmu-vinkki','?'], title: 'Osta vinkki sanasolmuun' },
-  { fn: resetWordGame, triggers: ['solmu-uusi','s-uus'], title: `Skippaa nykyinen sana (maksaa ${WordGame_PointCost} pistettä)` },
+  { fn: skipCurrentWordGame, triggers: ['solmu-uusi','s-uus'], title: `Skippaa nykyinen sana (maksaa ${WordGame_SkipCost} pistettä)` },
   { fn: defineWordGameWord, triggers: ['sanakirja', 'sk'], title: 'Etsi sana wiktionarysta' },
   { fn: CatPics.randomCatPic, triggers: ['kuva'], title: 'Satunnainen kissakuva' },
   { fn: processIsIt, triggers: ['onko'] },
@@ -210,21 +211,22 @@ function checkWord(message, args) {
   }
   console.log(`Attempts: ${ WordGame_Attempts }`);
 }
-function resetWordGame(message, args) {
-  const userPoints = HS_WordGame[message.author.username];
+function skipCurrentWordGame(message, args) {
+  const userPoints = getWordgamePoints(message.author);
   if(S_WordGame.currentWord){
-    if(userPoints >= WordGame_PointCost) {
+    if(userPoints >= WordGame_SkipCost) {
       message.channel.send(`Sana oli ${ S_WordGame.currentAnswer}.`);
       defineWordGameWord(message, [S_WordGame.currentAnswer]);
-      HS_WordGame[message.author.username] -= WordGame_PointCost;
-      Storage.setItem('WordGame_HiScores', HS_WordGame);
+      addWordgamePoints(message.author, -WordGame_SkipCost);
     } else { // exit early, user doesn't have enough points
-      message.reply(`Sanan ohittaminen maksaa ${ WordGame_PointCost } pistettä, sulla on vain ${ userPoints }`);
+      message.reply(`Sanan ohittaminen maksaa ${ WordGame_SkipCost } pistettä, sulla on vain ${ userPoints }`);
       return;
     }
   }
   getNewWord(message, args);
 }
+
+
 function defineWordGameWord(message, args) {
   message.channel.send(`https://en.wiktionary.org/wiki/${ args.join(' ') }#Finnish`);
 }
@@ -235,9 +237,7 @@ async function loadWordGameHiscores() {
 const HS_WordGame = await loadWordGameHiscores();
 async function addWordgamePoints(author, amount = 1) {
   const { username } = author;
-  if(!HS_WordGame[username]) {
-    HS_WordGame[username] = 0;
-  }
+  if(!HS_WordGame[username]) { HS_WordGame[username] = 0; }
   HS_WordGame[username] += amount;
   await Storage.setItem('WordGame_HiScores', HS_WordGame);
 }
@@ -257,11 +257,25 @@ function processWordGamePoints(message, [username] = []) {
   message.channel.send('.\n' + result);
 }
 function processWordGameHint(message) {
+  const userPoints = getWordgamePoints(message.author);
+  if(S_WordGame.currentWord){
+    if(userPoints >= WordGame_HintCost) {
+      addWordgamePoints(message.author, -WordGame_HintCost);
+      const hint = getWordGameHint();
+      message.channel.send(`Vinkki: ${hint}`);
+    } else { // exit early, user doesn't have enough points
+      message.reply(`Vinkki maksaa ${ WordGame_HintCost } pistettä, sulla on vain ${ userPoints }`);
+      return;
+    }
+  }
+}
+
+function getWordGameHint() {
   const hintIndex = floor(random() * S_WordGame.currentAnswer.length);
-  const hint = [...S_WordGame.currentAnswer].map((letter,index) => {
-    return index === hintIndex ? letter : '\\_'
-  }).join(' ');
-  message.channel.send(`${hint}`);
+  const hint = [...S_WordGame.currentAnswer]
+    .map((letter,index) => index === hintIndex ? letter.toUpperCase() : '\\_')
+    .join(' ');
+  return hint;
 }
 
 function processChatter(message) {
