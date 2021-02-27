@@ -14,14 +14,15 @@ await Storage.init();
 
 const commands = [
   { fn: require('./modules/roll7.js'), triggers: ['heitä7', '7'], title: 'Heitä 7 noppaa, pienin summa voittaa!' },
-  { fn: throwDice, triggers: ['noppa','n'], title: 'Heitä noppaa. Esim. `!noppa 12` arpoo luvun 1 ja 12 väliltä.' },
-  { fn: chooseOne, triggers: ['kumpi','k'], title: 'Valitse yksi. Esim. `!kumpi kissat vai koirat`.' },
+  { fn: throwDice, triggers: ['noppa','n'], title: 'Heitä noppaa. Esim. `!noppa 12` arpoo luvun 1 ja 12 väliltä' },
+  { fn: chooseOne, triggers: ['kumpi','k'], title: 'Valitse yksi. Esim. `!kumpi kissat vai koirat`' },
   { fn: processWordGame, triggers: ['solmu','s'], title: 'Pelaa sanasolmua. Esim. `!solmu arvaus`' },
-  { fn: processWordGamePoints, triggers: ['solmu-pisteet','s-pts'], title: 'Näytä sanasolmun pisteet.' },
+  { fn: processWordGamePoints, triggers: ['solmu-pisteet','s-pts'], title: 'Näytä sanasolmun pisteet' },
+  { fn: processWordGameHint, triggers: ['solmu-vinkki','?'], title: 'Osta vinkki sanasolmuun' },
   { fn: resetWordGame, triggers: ['solmu-uusi','s-uus'], title: `Skippaa nykyinen sana (maksaa ${WordGame_PointCost} pistettä)` },
   { fn: defineWordGameWord, triggers: ['sanakirja', 'sk'], title: 'Etsi sana wiktionarysta' },
   { fn: CatPics.randomCatPic, triggers: ['kuva'], title: 'Satunnainen kissakuva' },
-  { fn: processIsIt, triggers: ['onko'], title: 'Kysy jotain, vastaan jotain. ehkä.' },
+  { fn: processIsIt, triggers: ['onko'] },
   { fn: processReact, triggers: ['react'] },
   { fn: require('./modules/zalgo.js'), triggers: ['z'] },
   { fn: showHelp, triggers: ['apua','halp','help','apuva','komennot','commands'], title: 'Näyttää toiminnot' }
@@ -254,6 +255,13 @@ function processWordGamePoints(message, [username] = []) {
     .map(([user,points]) => `${ 'l'.repeat(points/10) } ${ user }: ${ points }`)
     .join('\n');
   message.channel.send('.\n' + result);
+}
+function processWordGameHint(message) {
+  const hintIndex = floor(random() * S_WordGame.currentAnswer.length);
+  const hint = [...S_WordGame.currentAnswer].map((letter,index) => {
+    return index === hintIndex ? letter : '\_'
+  }).join(' ');
+  message.reply(hint);
 }
 
 function processChatter(message) {
