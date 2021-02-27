@@ -19,7 +19,7 @@ const commands = [
   { fn: chooseOne, triggers: ['kumpi','k'], title: 'Valitse yksi. Esim. `!kumpi kissat vai koirat`' },
   { fn: processWordGame, triggers: ['solmu','s'], title: 'Pelaa sanasolmua. Esim. `!solmu arvaus`' },
   { fn: processWordGamePoints, triggers: ['solmu-pisteet','s-pts'], title: 'Näytä sanasolmun pisteet' },
-  { fn: processWordGameHint, triggers: ['solmu-vinkki','?'], title: 'Osta vinkki sanasolmuun' },
+  { fn: processWordGameHint, triggers: ['solmu-vinkki','?'], title: `Osta vinkki sanasolmuun (maksaa ${WordGame_HintCost} pistettä)` },
   { fn: skipCurrentWordGame, triggers: ['solmu-uusi','s-uus'], title: `Skippaa nykyinen sana (maksaa ${WordGame_SkipCost} pistettä)` },
   { fn: defineWordGameWord, triggers: ['sanakirja', 'sk'], title: 'Etsi sana wiktionarysta' },
   { fn: CatPics.randomCatPic, triggers: ['kuva'], title: 'Satunnainen kissakuva' },
