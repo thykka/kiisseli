@@ -8,7 +8,7 @@
     "node": "^14.16.0"
   },
   "scripts": {
-    "start": "node -r dotenv/config index.js",
+    "start": "node --trace-warnings -r dotenv/config index.js",
     "test": "node test.js"
   },
   "author": "Moses Holmström",
@@ -20,5 +20,8 @@
     "node-fetch": "^2.6.1",
     "node-persist": "^3.1.0",
     "to-zalgo": "^1.0.1"
+  },
+  "devDependencies": {
+    "eslint": "^7.21.0"
   }
 }

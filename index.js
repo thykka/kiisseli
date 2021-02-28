@@ -1,15 +1,4 @@
 import Brain from './modules/brain.js';
+import Config from './kiisseli.conf.js';
 
-(async function() {
-
-  const b = new Brain({
-    moduleNames: ['knot'],
-    moduleOptions: {
-      knot: { title: 'Sanasolmu' }
-    },
-    token: process.env.TOKEN
-  });
-  await b.init();
-
-  console.log(b)
-})()
+new Brain(process.env.TOKEN, Config);
