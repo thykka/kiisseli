@@ -57,8 +57,9 @@ class KnotGame {
   }
 
   hasSameLetters(word) {
-    return word.toLowerCase().split('').sort().join('') ===
-      this.game.knot.split('').sort().join('');
+    return word.length === this.game.answer.length &&
+      word.toLowerCase().split('').sort().join('') ===
+      this.game.answer.split('').sort().join('');
   }
 
   async processGuess(guess, message) {
