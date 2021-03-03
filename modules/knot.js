@@ -3,7 +3,7 @@ import wordList from './knot-words.js';
 
 import wordListFinnish from '../wordgame-words-big.js';
 
-const { log } = console;
+const log = (...args) => console.log(...args);
 
 class KnotGame {
   constructor(options) {
@@ -44,7 +44,7 @@ class KnotGame {
     });
     events.on('brain:connected', client => {
       this.channel = client.channels.cache.get(this.allowedChannels[0]);
-      this.initGame()
+      this.initGame();
     });
     this.events = events;
   }
@@ -53,8 +53,7 @@ class KnotGame {
     const storedPlayers = await this.storage.getItem(this.storageKeyPlayers);
     this.players = storedPlayers || [];
     const storedGame = await this.storage.getItem(this.storageKeyGame);
-    log(new Date(), _.omit(storedGame, ['answer']));
-    this.game = storedGame ||this.createGame(this.defaultLang, this.defaultLength);
+    this.game = storedGame || this.createGame(this.defaultLang, this.defaultLength);
   }
 
   async createGame(lang = this.game.lang, length = this.game.length) {
@@ -72,6 +71,7 @@ class KnotGame {
     const hints = '_'.repeat(answer.length);
     const game = { answer, knot, hints, lang, length: answer.length };
     await this.storage.setItem(this.storageKeyGame, game);
+    log(new Date(), _.omit(this.game, ['answer']));
     this.announceKnot(game.knot, lang, true);
     return game;
   }
