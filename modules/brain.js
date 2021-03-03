@@ -51,21 +51,20 @@ class Brain {
   async loadModule(config = {}) {
     const { name, file } = config;
     const module = await import(file || `./${ name }.js`);
-    const instance = new module.default(config);
-    this.initModuleEvents(instance);
+    const instance = new module.default({...config, name});
     this.initModuleStorage(instance);
-    this.events.emit(`${name}:ready`, instance);
+    this.initModuleEvents(instance);
     return instance;
   }
 
-  async initModuleEvents(instance) {
+  initModuleEvents(instance) {
     if(typeof instance.initEvents !== 'function') return;
-    await instance.initEvents(this.events);
+    instance.initEvents(this.events);
   }
 
-  async initModuleStorage(instance) {
+  initModuleStorage(instance) {
     if(typeof instance.initStorage !== 'function') return;
-    await instance.initStorage(Storage);
+    instance.initStorage(Storage);
   }
 
   processMessage(message) {
