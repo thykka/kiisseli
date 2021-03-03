@@ -100,7 +100,7 @@ class KnotGame {
   }
 
   async processGuess(guess, message) {
-    if(guess === this.game.answer) {
+    if(guess.toLowerCase() === this.game.answer) {
       message.react('✅');
       this.game = await this.createGame();
     } else {
