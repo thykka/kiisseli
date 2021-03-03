@@ -27,7 +27,9 @@ export default JSON.parse(JSON.stringify({
         '813884640926105620', // #kiisseli
         '813896696492326953', // #kiisseli-beta
       ], 
-      newKnotMessage: 'Uusi solmu',
+      commandsNewGame: ['s', 'solmu'],
+      newKnotMessage: 'Uusi solmu:',
+      showKnotMessage: 'Solmu:',
       defaultLang: 'fi'
     }
   ]

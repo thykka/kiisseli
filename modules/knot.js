@@ -3,36 +3,38 @@ import wordList from './knot-words.js';
 
 import wordListFinnish from '../wordgame-words-big.js';
 
+const { log } = console;
+
 class KnotGame {
   constructor(options) {
     const defaults = {
       storageKeyPlayers: 'knotPlayers',
       storageKeyGame: 'knotGame',
-      commandsNewGame: ['knot', 'knot.new'],
+      commandsNewGame: ['k', 'knot'],
       allowedChannels: ['channel_id_goes_here'],
-      newKnotMessage: 'New knot:',
+      newKnotMessage: 'New knot',
+      showKnotMessage: 'Current knot',
       wordList: {
         en: wordList,
-        fi: wordListFinnish
+        fi: wordListFinnish,
+        _debug: ['aaaaa']
       },
       flags: {
         en: '🇬🇧',
-        fi: '🇫🇮'
+        fi: '🇫🇮',
+        _debug: '🐛'
       },
       defaultLang: 'en',
+      defaultLength: 5,
       minLength: 3,
-      defaultLength: 5
+      maxShuffleAttempts: 50
     };
     Object.assign(this, defaults, options);
     this.defaultLang = Object.keys(this.wordList)[0];
   }
 
-  async initStorage(storage) {
+  initStorage(storage) {
     this.storage = storage;
-    const storedPlayers = await storage.getItem(this.storageKeyPlayers);
-    this.players = storedPlayers || [];
-    const storedGame = await storage.getItem(this.storageKeyGame);
-    this.game = storedGame ||this.createGame(this.defaultLang, this.defaultLength);
   }
 
   initEvents(events) {
@@ -41,28 +43,43 @@ class KnotGame {
       events.on(`command:${commandName}`, this.newGame.bind(this));
     });
     events.on('brain:connected', client => {
-      //this.client = client;
       this.channel = client.channels.cache.get(this.allowedChannels[0]);
+      this.initGame()
     });
     this.events = events;
   }
 
-  async createGame(lang = this.game.lastLang, length = this.game.lastLength) {
+  async initGame() {
+    const storedPlayers = await this.storage.getItem(this.storageKeyPlayers);
+    this.players = storedPlayers || [];
+    const storedGame = await this.storage.getItem(this.storageKeyGame);
+    log(new Date(), _.omit(storedGame, ['answer']));
+    this.game = storedGame ||this.createGame(this.defaultLang, this.defaultLength);
+  }
+
+  async createGame(lang = this.game.lang, length = this.game.length) {
     let list = this.wordList[lang];
     if(length && length >= this.minLength) {
       list = list.filter(word => word.length === length);
     }
     const answer = _.sample(list).toLowerCase();
-    const knot = _.shuffle([...answer]).join('');
+    let knot = answer;
+    let tries = 0;
+    do {
+      knot = _.shuffle([...answer]).join('');
+      tries++;
+    } while(knot === answer && tries > this.maxShuffleAttempts)
     const hints = '_'.repeat(answer.length);
-    const game = { answer, knot, hints, lastLang: lang, lastLength: answer.length };
+    const game = { answer, knot, hints, lang, length: answer.length };
     await this.storage.setItem(this.storageKeyGame, game);
-    this.announceKnot(game.knot, lang);
+    this.announceKnot(game.knot, lang, true);
     return game;
   }
 
-  announceKnot(knot, lang) {
-    this.channel.send(`${this.newKnotMessage} ${
+  announceKnot(knot = this.game.knot, lang = this.game.lang, isNew = false) {
+    this.channel.send(`${
+      isNew ? this.newKnotMessage : this.showKnotMessage
+    } ${
       this.flags[lang]
     } ${
       [...knot.toUpperCase()].map(l=>'`'+l+'`').join(' ')
@@ -72,12 +89,11 @@ class KnotGame {
   handleMessage(message) {
     if(!this.allowedChannels.includes(message.channel.id)) return;
     const word = message.content.split(/\s/)[0];
-    if(!word || !this.hasSameLetters(word)) return;
+    if(!word || !this.hasCorrectLetters(word)) return;
     this.processGuess(word, message);
   }
 
-  hasSameLetters(word) {
-    console.log(word, this.game.answer);
+  hasCorrectLetters(word) {
     return word.length === this.game.answer.length &&
       word.toLowerCase().split('').sort().join('') ===
       this.game.answer.toLowerCase().split('').sort().join('');
@@ -93,9 +109,18 @@ class KnotGame {
   }
 
   async newGame({command}) {
-    if(!Array.isArray(command.args) || command.args.length === 0) return;
-    const lang = command.args.find(arg => typeof arg === 'string' && ['en', 'fi'].includes(arg));
-    const length = command.args.find(arg => typeof arg === 'number');
+    if(!Array.isArray(command.args) || command.args.length === 0) {
+      this.announceKnot();
+      return;
+    }
+    const lang = command.args.find(
+      arg => typeof arg === 'string' &&
+        Object.keys(this.wordList).includes(arg)
+    );
+    const length = command.args.find(
+      arg => typeof arg === 'number' &&
+      arg >= this.minLength
+    );
     this.game = await this.createGame(lang, length);
   }
 }
