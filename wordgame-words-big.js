@@ -6,7 +6,7 @@ Sanalista julkaistaan GNU LGPL -lisenssillä.
 Lisenssiteksti luettavissa osoitteessa http://www.gnu.org/licenses/lgpl.html
 */
 
-const WordGameWords = `aakkonen
+const WordListFinnish = `aakkonen
 aakkosellinen
 aakkosellisesti
 aakkosellisuus
@@ -92993,4 +92993,4 @@ zulu
 öykkäröidä
 öykkäröinti
 öylätti`.split('\n').filter(w => w.indexOf(' ') == -1);
-module.exports = WordGameWords;
+export default WordListFinnish;
