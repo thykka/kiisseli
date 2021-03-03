@@ -15,6 +15,10 @@ class KnotGame {
         en: wordList,
         fi: wordListFinnish
       },
+      flags: {
+        en: '🇬🇧',
+        fi: '🇫🇮'
+      },
       defaultLang: 'en',
       minLength: 3,
       defaultLength: 5
@@ -53,12 +57,14 @@ class KnotGame {
     const hints = '_'.repeat(answer.length);
     const game = { answer, knot, hints, lastLang: lang, lastLength: answer.length };
     await this.storage.setItem(this.storageKeyGame, game);
-    this.announceKnot(game.knot);
+    this.announceKnot(game.knot, lang);
     return game;
   }
 
-  announceKnot(knot) {
+  announceKnot(knot, lang) {
     this.channel.send(`${this.newKnotMessage} ${
+      this.flags[lang]
+    } ${
       [...knot.toUpperCase()].map(l=>'`'+l+'`').join(' ')
     }`);
   }
@@ -87,13 +93,10 @@ class KnotGame {
   }
 
   async newGame({command}) {
-    if(Array.isArray(command.args) && command.args.length) {
-      const lang = command.args.find(arg => typeof arg === 'string' && ['en', 'fi'].includes(arg));
-      const length = command.args.find(arg => typeof arg === 'number');
-      this.game = await this.createGame(lang, length);
-    } else {
-      this.game = await this.createGame();
-    }
+    if(!Array.isArray(command.args) || command.args.length === 0) return;
+    const lang = command.args.find(arg => typeof arg === 'string' && ['en', 'fi'].includes(arg));
+    const length = command.args.find(arg => typeof arg === 'number');
+    this.game = await this.createGame(lang, length);
   }
 }
 
