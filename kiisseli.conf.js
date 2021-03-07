@@ -24,12 +24,14 @@ export default JSON.parse(JSON.stringify({
     },{
       name: 'knot',
       allowedChannels: [
+        //'813884640926105620', // #kiisseli
         '813896696492326953', // #kiisseli-beta
-        '813884640926105620', // #kiisseli
       ], 
       commandsNewGame: ['s', 'solmu'],
       newKnotMessage: 'Uusi solmu:',
       showKnotMessage: 'Solmu:',
+      announcePointsNewMessage: 'Pisteet:',
+      announcePointsTotalMessage: 'Yhteensä:',
       defaultLang: 'fi'
     }
   ]

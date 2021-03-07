@@ -2,6 +2,7 @@ import _ from 'lodash';
 import wordList from './knot-words.js';
 
 import wordListFinnish from '../wordgame-words-big.js';
+import Scores from './scores.js';
 
 const log = (...args) => console.log(...args);
 
@@ -14,6 +15,8 @@ class KnotGame {
       allowedChannels: ['channel_id_goes_here'],
       newKnotMessage: 'New knot',
       showKnotMessage: 'Current knot',
+      announcePointsNewMessage: 'Points:',
+      announcePointsTotalMessage: 'Total:',
       wordList: {
         en: wordList,
         fi: wordListFinnish,
@@ -35,6 +38,9 @@ class KnotGame {
 
   initStorage(storage) {
     this.storage = storage;
+    this.scores = new Scores(this.name, {
+      storage: this.storage
+    });
   }
 
   initEvents(events) {
@@ -53,7 +59,8 @@ class KnotGame {
     const storedPlayers = await this.storage.getItem(this.storageKeyPlayers);
     this.players = storedPlayers || [];
     const storedGame = await this.storage.getItem(this.storageKeyGame);
-    this.game = storedGame || this.createGame(this.defaultLang, this.defaultLength);
+    console.log(storedGame);
+    this.game = storedGame || await this.createGame(this.defaultLang, this.defaultLength);
   }
 
   async createGame(lang = this.game.lang, length = this.game.length) {
@@ -102,6 +109,12 @@ class KnotGame {
   async processGuess(guess, message) {
     if(guess.toLowerCase() === this.game.answer) {
       message.react('✅');
+      const points = Math.max(1, (this.game.answer.length - 4) * 2);
+      const { username } = message.author;
+      const result = await this.scores.modifyPlayerPoints(username, points);
+      message.reply(`${
+        this.announcePointsNewMessage
+      } ${ points } ${ this.announcePointsTotalMessage } ${ result }`);
       this.game = await this.createGame();
     } else {
       message.react('❌');
