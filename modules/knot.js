@@ -5,7 +5,7 @@ import wordListFinnish from '../wordgame-words-big.js';
 import Scores from './scores.js';
 
 const log = (...args) => console.log(...args);
-
+const { random, min, max } = Math;
 class KnotGame {
   constructor(options) {
     const defaults = {
@@ -30,6 +30,7 @@ class KnotGame {
       defaultLang: 'en',
       defaultLength: 5,
       minLength: 3,
+      maxLength: 10,
       maxShuffleAttempts: 50
     };
     Object.assign(this, defaults, options);
@@ -63,10 +64,33 @@ class KnotGame {
     this.game = storedGame || await this.createGame(this.defaultLang, this.defaultLength);
   }
 
+  nudgeLength(length) {
+    let newLength = length;
+    if(random() < 0.5) {
+      const rnd = random();
+      switch(true) {
+        case rnd<0.25:
+          newLength -= 2;
+          break;
+        case rnd<0.50:
+          newLength -= 1;
+          break;
+        case rnd<0.75:
+          newLength += 1;
+          break;
+        default:
+          newLength += 2;
+      }
+      newLength = max(this.minLength, min(newLength, this.maxLength));
+    }
+    return newLength;
+  }
+
   async createGame(lang = this.game.lang, length = this.game.length) {
     let list = this.wordList[lang];
     if(length && length >= this.minLength) {
-      list = list.filter(word => word.length === length);
+      const newLength = this.nudgeLength(length);
+      list = list.filter(word => word.length === newLength);
     }
     const answer = _.sample(list).toLowerCase();
     let knot = answer;
