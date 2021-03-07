@@ -86,12 +86,15 @@ class KnotGame {
     return newLength;
   }
 
-  async createGame(lang = this.game.lang, length = this.game.length) {
-    let list = this.wordList[lang];
-    if(length && length >= this.minLength) {
-      const newLength = this.nudgeLength(length);
-      list = list.filter(word => word.length === newLength);
-    }
+  async createGame(lang = this.game.lang, length) {
+    const newLength = (
+      length && length >= this.minLength
+    ) ? length
+      : this.nudgeLength(this.game.length);
+    const list = (
+      this.wordList[lang] ||
+      this.wordList[this.defaultLang]
+    ).filter(word => word.length === newLength);
     const answer = _.sample(list).toLowerCase();
     let knot = answer;
     let tries = 0;
