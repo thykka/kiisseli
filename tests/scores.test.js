@@ -34,4 +34,13 @@ test('Saving and reading works', async t => {
   t.assert(await s.getPlayerPoints(testPlayer2) === -100);
 });
 
+test('Formats the score list', async t => {
+  const s = new scores('test4', { storage: Storage });
+  await s.setPlayerPoints('Alpha', 1999);
+  await s.setPlayerPoints('Beta', 11111);
+  await s.setPlayerPoints('Gamma', 99);
+  const out = await s.getHiscoreList();
+  t.truthy(out && typeof out === 'string' && out.length >= 25);
+});
+
 })();

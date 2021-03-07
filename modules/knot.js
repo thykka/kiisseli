@@ -12,6 +12,7 @@ class KnotGame {
       storageKeyPlayers: 'knotPlayers',
       storageKeyGame: 'knotGame',
       commandsNewGame: ['k', 'knot'],
+      commandsShowScores: ['kp', 'knot.points'],
       allowedChannels: ['channel_id_goes_here'],
       newKnotMessage: 'New knot',
       showKnotMessage: 'Current knot',
@@ -48,6 +49,9 @@ class KnotGame {
     events.on('message', this.handleMessage.bind(this));
     this.commandsNewGame.forEach(commandName => {
       events.on(`command:${commandName}`, this.newGame.bind(this));
+    });
+    this.commandsShowScores.forEach(commandName => {
+      events.on(`command:${commandName}`, this.showScores.bind(this));
     });
     events.on('brain:connected', client => {
       this.channel = client.channels.cache.get(this.allowedChannels[0]);
@@ -162,6 +166,12 @@ class KnotGame {
       arg >= this.minLength
     );
     this.game = await this.createGame(lang, length);
+  }
+
+  async showScores({message}) {
+    const scoresText = await this.scores.getHiscoreList();
+    log(scoresText);
+    message.channel.send(scoresText);
   }
 }
 

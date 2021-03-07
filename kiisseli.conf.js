@@ -28,6 +28,7 @@ export default JSON.parse(JSON.stringify({
         '813896696492326953', // #kiisseli-beta
       ], 
       commandsNewGame: ['s', 'solmu'],
+      commandsShowScores: ['s.', 'solmu.pisteet'],
       newKnotMessage: 'Uusi solmu:',
       showKnotMessage: 'Solmu:',
       announcePointsNewMessage: 'Pisteet:',
