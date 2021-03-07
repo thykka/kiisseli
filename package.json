@@ -9,7 +9,8 @@
   },
   "scripts": {
     "start": "node --trace-warnings -r dotenv/config index.js",
-    "test": "node test.js"
+    "test": "ava",
+    "clean": "rm -r ./.node-persist"
   },
   "author": "Moses Holmström",
   "license": "MIT",
@@ -22,6 +23,7 @@
     "to-zalgo": "^1.0.1"
   },
   "devDependencies": {
+    "ava": "^3.15.0",
     "eslint": "^7.21.0"
   }
 }
