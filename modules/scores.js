@@ -46,7 +46,7 @@ class Scores {
     const scores = await this.storage.getItem(this.getKey());
     const maxNameLength = Object.keys(scores)
       .reduce((acc, name) => Math.max(acc, name.length), 0);
-    return `\`\`\`${ this.name }\n${
+    return `\`\`\`\n${ this.name }\n${
       Object.entries(scores)
       .sort((a, b) => b[1] - a[1])
       .map(([player, points]) => `${ player.padEnd(maxNameLength, ' ') }: ${ points }`)
