@@ -42,6 +42,18 @@ class Brain {
       this.events.emit('brain:connected', this.client);
     });
     this.client.on('message', this.processMessage.bind(this));
+    this.events.on('brain:requestPresence', (...args) => this.requestPresence(...args));
+  }
+
+  async requestPresence(options) {
+    const settings = {
+      status: 'online'
+    };
+    settings.activity = options.activityText ? {
+      type: 'PLAYING',
+      name: options.activityText || options || ''
+    } : {};
+    await this.client.user.setPresence(settings);
   }
 
   async loadModules(modules) {

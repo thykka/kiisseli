@@ -36,6 +36,7 @@ export default {
       announcePointsTotalMessage: 'Yhteensä:',
       cannotBuyHintMessage: f => `Ei pysty. Tarvitset ${f.cost} pistettä, sinulla on vain ${f.points}.`,
       boughtHintMessage: f => `${f.player} osti vihjeen: ${f.hint}`,
+      gameActivity: f => `Solmu: ${f.knot}`,
       defaultLang: 'fi',
       hintCost: 2
     }

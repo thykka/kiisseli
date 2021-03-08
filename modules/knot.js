@@ -19,6 +19,7 @@ class KnotGame {
       showKnotMessage: 'Current knot',
       announcePointsNewMessage: 'Points:',
       announcePointsTotalMessage: 'Total:',
+      gameActivity: f => `Knot: ${ f.knot }`,
       wordList: {
         en: wordList,
         fi: wordListFinnish,
@@ -87,6 +88,9 @@ class KnotGame {
     const storedGame = await this.storage.getItem(this.storageKeyGame);
     console.log(storedGame);
     this.game = storedGame || await this.createGame(this.defaultLang, this.defaultLength);
+    this.events.emit('brain:requestPresence', {
+      activityText: this.loc('gameActivity', { knot: this.game.knot.toUpperCase() })
+    })
   }
 
   nudgeLength(length) {
