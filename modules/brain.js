@@ -46,7 +46,6 @@ class Brain {
   }
 
   async requestPresence(options) {
-    console.log(options)
     const settings = {
       status: 'online'
     };

@@ -138,7 +138,7 @@ class KnotGame {
     const hints = '_'.repeat(answer.length);
     const game = { answer, knot, hints, lang, length: answer.length };
     await this.storage.setItem(this.storageKeyGame, game);
-    log(new Date(), _.omit(this.game, ['answer']));
+    log(new Date(), _.omit(game, ['answer']));
     this.announceKnot(game.knot, lang, true);
     this.updateKnotActivity(game);
     return game;
