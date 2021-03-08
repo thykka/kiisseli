@@ -13,6 +13,7 @@ class KnotGame {
       storageKeyGame: 'knotGame',
       commandsNewGame: ['k', 'knot'],
       commandsShowScores: ['kp', 'knot.points'],
+      commandsRequestHint: ['kh', 'knot.hint'],
       allowedChannels: ['channel_id_goes_here'],
       newKnotMessage: 'New knot',
       showKnotMessage: 'Current knot',
@@ -32,10 +33,25 @@ class KnotGame {
       defaultLength: 5,
       minLength: 3,
       maxLength: 10,
-      maxShuffleAttempts: 50
+      maxShuffleAttempts: 50,
+      hintCost: 1,
+      cannotBuyHintMessage: f => `Not enough points to buy hint (${f.points}/${f.cost})`,
+      boughtHintMessage: f => `${f.player} paid ${f.cost} points for a hint: ${f.hint}`
     };
     Object.assign(this, defaults, options);
     this.defaultLang = Object.keys(this.wordList)[0];
+  }
+
+  loc(id, view) {
+    const foundTranslation = this[id];
+    switch (typeof foundTranslation) {
+      case 'string':
+        return foundTranslation;
+      case 'function':
+        return foundTranslation(view);
+      default:
+        return `{${id}}`;
+    }
   }
 
   initStorage(storage) {
@@ -46,18 +62,23 @@ class KnotGame {
   }
 
   initEvents(events) {
-    events.on('message', this.handleMessage.bind(this));
-    this.commandsNewGame.forEach(commandName => {
-      events.on(`command:${commandName}`, this.newGame.bind(this));
-    });
-    this.commandsShowScores.forEach(commandName => {
-      events.on(`command:${commandName}`, this.showScores.bind(this));
-    });
+    this.events = events;
+    this.events.on('message', this.handleMessage.bind(this));
+
+    this._initCommandEvents(this.commandsNewGame, this.newGame);
+    this._initCommandEvents(this.commandsShowScores, this.showScores);
+    this._initCommandEvents(this.commandsRequestHint, this.requestHint);
+
     events.on('brain:connected', client => {
       this.channel = client.channels.cache.get(this.allowedChannels[0]);
       this.initGame();
     });
-    this.events = events;
+  }
+
+  _initCommandEvents(commands, handler) {
+    if(typeof handler !== 'function' || !Array.isArray(commands)) return;
+    const fn = handler.bind(this);
+    commands.forEach(name => this.events.on(`command:${name}`, fn))
   }
 
   async initGame() {
@@ -120,8 +141,12 @@ class KnotGame {
     } ${
       this.flags[lang]
     } ${
-      [...knot.toUpperCase()].map(l=>'`'+l+'`').join(' ')
+      this.formatLetters(knot)
     }`);
+  }
+
+  formatLetters(letters) {
+    return [...letters.toUpperCase()].map(l=>'`'+l+'`').join(' ');
   }
 
   handleMessage(message) {
@@ -172,6 +197,43 @@ class KnotGame {
     const scoresText = await this.scores.getHiscoreList();
     log(scoresText);
     message.channel.send(scoresText);
+  }
+
+  async requestHint({message}) {
+    const { username } = message.author;
+    const currentPoints = await this.scores.getPlayerPoints(username);
+    if(currentPoints < this.hintCost) {
+      message.reply(this.loc('cannotBuyHintMessage', {
+        cost: this.hintCost,
+        points: currentPoints
+      }));
+      return;
+    }
+    const pointsLeft = await this.scores.modifyPlayerPoints(username, -this.hintCost);
+    const hint = this.randomHint();
+    this.game.hints = hint;
+    await this.storage.setItem(this.storageKeyGame, this.game);
+    message.channel.send(this.loc('boughtHintMessage', {
+      player: username,
+      cost: this.hintCost,
+      left: pointsLeft,
+      hint: this.formatLetters(hint)
+    }));
+  }
+
+  randomHint() {
+    const hiddenIndexes = [...this.game.hints].reduce((acc, letter, index) => {
+      if(letter === '_') return [...acc, index];
+      return acc;
+    },[]);
+    const revealIndex = _.sample(hiddenIndexes);
+    return [...this.game.hints].map((letter, index) => {
+      return index === revealIndex ? this.game.answer[revealIndex] : letter
+    }).join('');
+  }
+
+  formatHint(hint) {
+    return [...hint].map(l => `\`${l}\` `).join('');
   }
 }
 

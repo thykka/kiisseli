@@ -1,4 +1,4 @@
-export default JSON.parse(JSON.stringify({
+export default {
   autoConnect: true,
   commandPrefix: '=',
   modules: [
@@ -29,11 +29,15 @@ export default JSON.parse(JSON.stringify({
       ], 
       commandsNewGame: ['s', 'solmu'],
       commandsShowScores: ['s.', 'solmu.pisteet'],
+      commandsRequestHint: ['s?', 'solmu.vihje'],
       newKnotMessage: 'Uusi solmu:',
       showKnotMessage: 'Solmu:',
       announcePointsNewMessage: 'Pisteet:',
       announcePointsTotalMessage: 'Yhteensä:',
-      defaultLang: 'fi'
+      cannotBuyHintMessage: f => `Ei pysty. Tarvitset ${f.cost} pistettä, sinulla on vain ${f.points}.`,
+      boughtHintMessage: f => `${f.player} osti vihjeen: ${f.hint}`,
+      defaultLang: 'fi',
+      hintCost: 2
     }
   ]
-}));
+};
