@@ -91,9 +91,9 @@ class KnotGame {
     this.updateKnotActivity();
   }
 
-  updateKnotActivity() {
+  updateKnotActivity(currentGame = this.game) {
     this.events.emit('brain:requestPresence', {
-      activityText: this.loc('gameActivity', { knot: this.game.knot.toUpperCase() })
+      activityText: this.loc('gameActivity', { knot: currentGame.knot.toUpperCase() })
     });
   }
 
@@ -140,7 +140,7 @@ class KnotGame {
     await this.storage.setItem(this.storageKeyGame, game);
     log(new Date(), _.omit(this.game, ['answer']));
     this.announceKnot(game.knot, lang, true);
-    this.updateKnotActivity();
+    this.updateKnotActivity(game);
     return game;
   }
 
