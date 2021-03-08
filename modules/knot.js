@@ -88,9 +88,13 @@ class KnotGame {
     const storedGame = await this.storage.getItem(this.storageKeyGame);
     console.log(storedGame);
     this.game = storedGame || await this.createGame(this.defaultLang, this.defaultLength);
+    this.updateKnotActivity();
+  }
+
+  updateKnotActivity() {
     this.events.emit('brain:requestPresence', {
       activityText: this.loc('gameActivity', { knot: this.game.knot.toUpperCase() })
-    })
+    });
   }
 
   nudgeLength(length) {
@@ -136,6 +140,7 @@ class KnotGame {
     await this.storage.setItem(this.storageKeyGame, game);
     log(new Date(), _.omit(this.game, ['answer']));
     this.announceKnot(game.knot, lang, true);
+    this.updateKnotActivity();
     return game;
   }
 
