@@ -34,7 +34,7 @@ class KnotGame {
       defaultLength: 5,
       minLength: 3,
       maxLength: 10,
-      maxShuffleAttempts: 50,
+      maxShuffleAttempts: 500,
       hintCost: 1,
       cannotBuyHintMessage: f => `Not enough points to buy hint (${f.points}/${f.cost})`,
       boughtHintMessage: f => `${f.player} paid ${f.cost} points for a hint: ${f.hint}`
