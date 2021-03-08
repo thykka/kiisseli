@@ -86,7 +86,7 @@ class KnotGame {
     const storedPlayers = await this.storage.getItem(this.storageKeyPlayers);
     this.players = storedPlayers || [];
     const storedGame = await this.storage.getItem(this.storageKeyGame);
-    console.log(storedGame);
+    console.log(_.omit(storedGame, ['answer']));
     this.game = storedGame || await this.createGame(this.defaultLang, this.defaultLength);
     this.updateKnotActivity();
   }
