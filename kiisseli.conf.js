@@ -1,6 +1,8 @@
 export default {
   autoConnect: true,
-  commandPrefix: '=',
+  commandPrefix: '.',
+  commandsDescription: 'Komennot:',
+  commandsSelfDescription: 'Näyttää komennot',
   modules: [
     {
       name: 'dice',
@@ -15,11 +17,15 @@ export default {
         rollRandom_result: 'heitit',
         rollDice_validRange: 'anna numero väliltä',
         rollDice_result: 'heitit',
-        rollDice_total: 'yht.'
+        rollDice_total: 'yht.',
+        rollRandomDescription: 'Heitä 6-sivuista noppaa',
+        rollDiceDescription: 'Heitä viisi noppaa',
+        rollRandomSidesDescription: 'Heitä noppaa, jossa valittu määrä sivuja',
+        rollDiceCountDescription: 'Heitä valittu määrä noppia'
       },
       commands: {
-        rollRandom: ['random', 'r'],
-        rollDice: ['heitä', 'h']
+        rollRandom: ['noppa', 'n'],
+        rollDice: ['nopat', 'np']
       }
     },{
       name: 'knot',
@@ -27,16 +33,22 @@ export default {
         //'813884640926105620', // #kiisseli
         '813896696492326953', // #kiisseli-beta
       ], 
-      commandsNewGame: ['s', 'solmu'],
-      commandsShowScores: ['s.', 'solmu.pisteet'],
-      commandsRequestHint: ['s?', 'solmu.vihje'],
-      newKnotMessage: 'Uusi solmu:',
-      showKnotMessage: 'Solmu:',
-      announcePointsNewMessage: 'Pisteet:',
-      announcePointsTotalMessage: 'Yhteensä:',
-      cannotBuyHintMessage: f => `Ei pysty. Tarvitset ${f.cost} pistettä, sinulla on vain ${f.points}.`,
+      commandsNewGame: ['solmu','s'],
+      commandsShowScores: ['solmu.pisteet','s.'],
+      commandsRequestHint: ['solmu.vihje','s?'],
+      newKnotMessage: f => `Uusi solmu: ${ f.flag } ${ f.knot }`,
+      showKnotMessage: f => `${ f.flag }\n\tSolmu: ${ f.knot }${ f.hint ? '\n\tVinkki: ' + f.hint : '' }`,
+      showCurrentPointsMessage: f => `sait ${ f.points }piste${ f.points == 1 ? 'en' : 'ttä' }! Yhteensä ${ f.total }`,
+      cannotBuyHintMessage: f => `Vinkki maksaa ${f.cost} pistettä, sinulla on vain ${f.points}`,
       boughtHintMessage: f => `${f.player} osti vihjeen: ${f.hint}`,
       gameActivity: f => `Solmu: ${f.knot}`,
+      descriptionNewGame: 'Näytä nykyinen solmu',
+      descriptionRequestHint: f => `Paljastaa yhden kirjaimen solmusta. Maksaa ${ f.cost } pistettä`,
+      descriptionShowScores: 'Näytä pisteet',
+      descriptionNewGameNumArg: 'Uusi solmu valitulla pituudella',
+      descriptionNewGameLangArg: 'Uusi solmu valitulla kielellä',
+      rightEmoji: '😻',
+      wrongEmoji: '😸',
       defaultLang: 'fi',
       hintCost: 2
     }
