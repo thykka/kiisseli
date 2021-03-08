@@ -15,20 +15,25 @@ class KnotGame {
       commandsShowScores: ['kp', 'knot.points'],
       commandsRequestHint: ['kh', 'knot.hint'],
       allowedChannels: ['channel_id_goes_here'],
-      newKnotMessage: 'New knot',
-      showKnotMessage: 'Current knot',
+      newKnotMessage: f => `New knot: ${ f.flag } ${ f.knot }`,
+      showKnotMessage: f => `Current knot: ${ f.flag } ${ f.knot } (${ f.hint })`,
       announcePointsNewMessage: 'Points:',
       announcePointsTotalMessage: 'Total:',
+      descriptionNewGame: 'Show current word',
+      descriptionRequestHint: `Reveal a letter's location`,
+      descriptionShowScores: 'Show hi-scores',
+      descriptionNewGameNumArg: 'Start new game with custom word length',
+      descriptionNewGameLangArg: 'Start new game with custom language',
       gameActivity: f => `Knot: ${ f.knot }`,
+      rightEmoji: '✅',
+      wrongEmoji: '❌',
       wordList: {
         en: wordList,
-        fi: wordListFinnish,
-        _debug: ['aaaaa']
+        fi: wordListFinnish
       },
       flags: {
         en: '🇬🇧',
-        fi: '🇫🇮',
-        _debug: '🐛'
+        fi: '🇫🇮'
       },
       defaultLang: 'en',
       defaultLength: 5,
@@ -82,9 +87,31 @@ class KnotGame {
     commands.forEach(name => this.events.on(`command:${name}`, fn))
   }
 
+  listCommands() {
+    return [
+      {
+        command: this.commandsNewGame[0],
+        description: this.loc('descriptionNewGame'),
+        args: [
+          {
+            command: `${this.commandsNewGame[0]} <${this.minLength}-${this.maxLength}>`,
+            description: this.loc('descriptionNewGameNumArg')
+          },{
+            command: `${this.commandsNewGame[0]} <${Object.keys(this.wordList).join('/')}>`,
+            description: this.loc('descriptionNewGameLangArg')
+          }
+        ]
+      },{
+        command: this.commandsRequestHint[0],
+        description: this.loc('descriptionRequestHint', { cost: this.hintCost })
+      },{
+        command: this.commandsShowScores[0],
+        description: this.loc('descriptionShowScores')
+      }
+    ]
+  }
+
   async initGame() {
-    const storedPlayers = await this.storage.getItem(this.storageKeyPlayers);
-    this.players = storedPlayers || [];
     const storedGame = await this.storage.getItem(this.storageKeyGame);
     console.log(_.omit(storedGame, ['answer']));
     this.game = storedGame || await this.createGame(this.defaultLang, this.defaultLength);
@@ -145,13 +172,16 @@ class KnotGame {
   }
 
   announceKnot(knot = this.game.knot, lang = this.game.lang, isNew = false) {
-    this.channel.send(`${
-      isNew ? this.newKnotMessage : this.showKnotMessage
-    } ${
-      this.flags[lang]
-    } ${
-      this.formatLetters(knot)
-    }`);
+    const view = {
+      flag: this.flags[lang],
+      knot: this.formatLetters(knot),
+      hint: this.game.hints === '_'.repeat(this.game.hints.length)
+        ? null
+        : this.formatLetters(this.game.hints)
+    };
+    this.channel.send(
+      this.loc(isNew ? 'newKnotMessage' : 'showKnotMessage', view)
+    );
   }
 
   formatLetters(letters) {
@@ -173,16 +203,14 @@ class KnotGame {
 
   async processGuess(guess, message) {
     if(guess.toLowerCase() === this.game.answer) {
-      message.react('✅');
+      message.react(this.rightEmoji);
       const points = Math.max(1, (this.game.answer.length - 4) * 2);
       const { username } = message.author;
       const result = await this.scores.modifyPlayerPoints(username, points);
-      message.reply(`${
-        this.announcePointsNewMessage
-      } ${ points } ${ this.announcePointsTotalMessage } ${ result }`);
+      message.reply(this.loc('showCurrentPointsMessage', { points, total: result }));
       this.game = await this.createGame();
     } else {
-      message.react('❌');
+      message.react(this.wrongEmoji);
     }
   }
 

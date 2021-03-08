@@ -12,7 +12,11 @@ class DiceGame {
         rollRandom_result: 'You rolled a',
         rollDice_validRange: 'Number must be within range',
         rollDice_result: 'You rolled:',
-        rollDice_total: 'Total'
+        rollDice_total: 'Total',
+        rollRandomDescription: 'Throw a 6-sided die',
+        rollDiceDescription: 'Throw five dice',
+        rollRandomSidesDescription: 'Throw a <n>-sided die',
+        rollDiceCountDescription: 'Throw <n> dice'
       },
       commands: {
         rollRandom: ['random'],
@@ -34,14 +38,32 @@ class DiceGame {
     });
   }
 
+  listCommands() {
+    return [{
+      command: this.commands.rollRandom[0],
+      description: this.translations.rollRandomDescription,
+      args: [{
+        command: `${this.commands.rollRandom[0]} <${this.minSides}-${this.maxSides}>`,
+        description: this.translations.rollRandomSidesDescription
+      }]
+    },{
+      command: this.commands.rollDice[0],
+      description: this.translations.rollDiceDescription,
+      args: [{
+        command: `${this.commands.rollDice[0]} <1-${this.maxDice}>`,
+        description: this.translations.rollDiceCountDescription
+      }]
+    }]
+  }
+
   rollDice({ command, message }) {
-    const count = typeof command.args[0] === 'number' ? command.args[0] : 1;
-    if(count < 0 || count > this.maxDice) {
+    const count = typeof command.args[0] === 'number' ? command.args[0] : 5;
+    if(count < 1 || count > this.maxDice) {
       message.reply(`${
         this.translations.rollDice_validRange
-      } 0-${ this.maxDice }`);
+      } 1-${ this.maxDice }`);
       return;
-    };
+    }
     const dice = Array.from(
       { length: count }, () => this.getSingle()
     );

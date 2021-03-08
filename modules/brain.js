@@ -14,6 +14,8 @@ class Brain {
   constructor(token, config) {
     const defaults = {
       commandPrefix: 'brain',
+      commandsDescription: 'Available commands:',
+      commandsSelfDescription: 'Shows available commands',
       token
     };
     Object.assign(this, defaults, config);
@@ -43,6 +45,8 @@ class Brain {
     });
     this.client.on('message', this.processMessage.bind(this));
     this.events.on('brain:requestPresence', (...args) => this.requestPresence(...args));
+
+    this.events.on('command:?', ev => this.listCommands(ev));
   }
 
   async requestPresence(options) {
@@ -78,6 +82,28 @@ class Brain {
     if(typeof instance.initStorage !== 'function') return;
     instance.initStorage(Storage);
   }
+
+  listCommands({message}) {
+    const helpCommandText = this.formatCommand({
+      command: '?',
+      description: this.commandsSelfDescription
+    });
+    const commandsText = this._modules
+      .flatMap(mod => typeof mod.listCommands === 'function'
+        ? mod.listCommands().map(result => `${ this.formatCommand(result) }`)
+        : false)
+      .filter(text => text !== false)
+      .join('\n');
+    message.reply(`${ this.commandsDescription }\n${ helpCommandText }\n${ commandsText }`);
+  }
+
+  formatCommand({command, description, args}) {
+    const argCommands = Array.isArray(args)
+      ? '\n\t' + args.map(argCommand => this.formatCommand(argCommand)).join('\n\t')
+      : '';
+    return `\`${this.commandPrefix}${command}\` - ${description}${ argCommands }`
+  }
+
 
   processMessage(message) {
     if(message.author.equals(this.client.user)) return;
