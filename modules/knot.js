@@ -207,7 +207,7 @@ class KnotGame {
       const points = Math.max(1, (this.game.answer.length - 4) * 2);
       const { username } = message.author;
       const result = await this.scores.modifyPlayerPoints(username, points);
-      message.reply(this.loc('showCurrentPointsMessage', { points, total: result }));
+      message.reply(this.loc('showCurrentPointsMessage', { answer: this.game.answer, points, total: result }));
       this.game = await this.createGame();
     } else {
       message.react(this.wrongEmoji);

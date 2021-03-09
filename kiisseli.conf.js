@@ -38,7 +38,7 @@ export default {
       commandsRequestHint: ['solmu.vihje','s?'],
       newKnotMessage: f => `Uusi solmu: ${ f.flag } ${ f.knot }`,
       showKnotMessage: f => `${ f.flag }\n\tSolmu: ${ f.knot }${ f.hint ? '\n\tVinkki: ' + f.hint : '' }`,
-      showCurrentPointsMessage: f => `sait ${ f.points } piste${ f.points == 1 ? 'en' : 'ttä' }! Yhteensä ${ f.total }`,
+      showCurrentPointsMessage: f => `sait ${ f.points } piste${ f.points == 1 ? 'en' : 'ttä' } arvaamalla sanan "${ f.answer }"! (yhteensä ${ f.total })`,
       cannotBuyHintMessage: f => `Vinkki maksaa ${f.cost} pistettä, sinulla on vain ${f.points}`,
       boughtHintMessage: f => `${f.player} osti vihjeen: ${f.hint}`,
       gameActivity: f => `Solmu: ${f.knot}`,
