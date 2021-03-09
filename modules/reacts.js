@@ -2,7 +2,8 @@ export default class Reacts {
   constructor(options) {
     const defaults = {
       reactions: [
-        ['Hello, World', '🌐']
+        ['Hello, World', '🌐'], // [message part to match, emoji to react with]
+        [/Hello, World/, '🌍']
       ]
     };
     Object.assign(this, defaults, options);
@@ -17,7 +18,6 @@ export default class Reacts {
       const regex = typeof trigger === 'string'
         ? new RegExp(`\\b${trigger}\\b`)
         : trigger;
-      console.log(regex)
       if(message.content.match(regex)) {
         message.react(emoji)
       }
