@@ -5,6 +5,12 @@ export default {
   commandsSelfDescription: 'Näyttää komennot',
   modules: [
     {
+      name: 'reacts',
+      reactions: [
+        [/(kis(u\b|sa|soja\b)|kiissel)/, '🐈'],
+        ['bileet', '🎉'],
+      ]
+    },{
       name: 'dice',
       //icons: ['⓿','❶','❷','❸','❹','❺','❻','❼','❽','❾']
       //minSides: 2,
