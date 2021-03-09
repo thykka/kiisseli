@@ -19,8 +19,10 @@
     "dotenv": "^8.2.0",
     "lodash": "^4.17.21",
     "node-fetch": "^2.6.1",
+    "node-html-parser": "^3.0.4",
     "node-persist": "^3.1.0",
-    "to-zalgo": "^1.0.1"
+    "to-zalgo": "^1.0.1",
+    "wiktionary": "^1.2.3"
   },
   "devDependencies": {
     "ava": "^3.15.0",

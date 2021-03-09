@@ -58,6 +58,16 @@ export default {
       defaultLang: 'fi',
       hintCost: 2,
       lengthProbabilities: [0,1,1,10,20,10,5,2,1,1,1,1]
+    },{
+      name: 'dictionary',
+      commands: {
+        definition: ['sanakirja', 'sk']
+      },
+      language: 'fi',
+      noResultsMessage: 'Ei löytyny',
+      definitionError: 'Huppista saatana',
+      definitionTypeHint: 'Sana',
+      definitionDescription: 'Etsi sanan määritelmää (suomeksi)'
     }
   ]
 };
