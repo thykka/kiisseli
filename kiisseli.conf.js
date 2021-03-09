@@ -56,7 +56,8 @@ export default {
       rightEmoji: '😻',
       wrongEmoji: '😸',
       defaultLang: 'fi',
-      hintCost: 2
+      hintCost: 2,
+      lengthProbabilities: [0,1,1,10,20,10,5,2,1,1,1,1]
     }
   ]
 };
