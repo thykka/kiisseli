@@ -126,7 +126,10 @@ class KnotGame {
   }
 
   async createGame(lang = this.game.lang, length) {
-    let newLength = (length && length > 0) ? length
+    let newLength = (
+      length &&
+      length > this.lengthProbabilities.findIndex(p => p > 0)
+    ) ? length
       : weighedRandom(this.lengthProbabilities) + 1;
     const list = (
       this.wordList[lang] ||
