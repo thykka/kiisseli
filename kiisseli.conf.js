@@ -68,6 +68,12 @@ export default {
       definitionError: 'Huppista saatana',
       definitionTypeHint: 'Sana',
       definitionDescription: 'Etsi sanan määritelmää (suomeksi)'
+    },{
+      name: 'pics',
+      commands: {
+        getPicture: ['kuva', 'k']
+      },
+      getPictureDescription: 'Satunnainen kissakuva'
     }
   ]
 };
