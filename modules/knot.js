@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import Translation from './translation.js';
 import wordList from './knot-words.js';
 
 import wordListFinnish from '../wordgame-words-big.js';
@@ -18,16 +19,19 @@ class KnotGame {
       commandsShowScores: ['kp', 'knot.points'],
       commandsRequestHint: ['kh', 'knot.hint'],
       allowedChannels: ['channel_id_goes_here'],
-      newKnotMessage: f => `New knot: ${ f.flag } ${ f.knot }`,
-      showKnotMessage: f => `Current knot: ${ f.flag } ${ f.knot } (${ f.hint })`,
-      announcePointsNewMessage: 'Points:',
-      announcePointsTotalMessage: 'Total:',
-      descriptionNewGame: 'Show current word',
-      descriptionRequestHint: `Reveal a letter's location`,
-      descriptionShowScores: 'Show hi-scores',
-      descriptionNewGameNumArg: 'Start new game with custom word length',
-      descriptionNewGameLangArg: 'Start new game with custom language',
-      gameActivity: f => `Knot: ${ f.knot }`,
+      translations: {
+        newKnotMessage: v => `New knot: ${v.flag} ${v.knot}`,
+        showKnotMessage: v => `Current knot: ${v.flag} ${v.knot} (${v.hint})`,
+        showCurrentPointsMessage: v => `You received ${v.points}, total: ${v.total}`,
+        cannotBuyHintMessage: v => `Hint costs ${v.cost}, you only have ${v.points}`,
+        boughtHintMessage: v => `${v.player} bought a hint: ${v.hint}`,
+        gameActivity: v => `Knot: ${v.knot}`,
+        descriptionNewGame: 'Show current word',
+        descriptionRequestHint: v => `Reveal a letter's location, costs ${v.cost} points`,
+        descriptionShowScores: 'Show hi-scores',
+        descriptionNewGameNumArg: 'Start new game with custom word length',
+        descriptionNewGameLangArg: 'Start new game with custom language',
+      },
       rightEmoji: '✅',
       wrongEmoji: '❌',
       wordList: {
@@ -42,24 +46,11 @@ class KnotGame {
       defaultLength: 5,
       maxShuffleAttempts: 500,
       hintCost: 1,
-      cannotBuyHintMessage: f => `Not enough points to buy hint (${f.points}/${f.cost})`,
-      boughtHintMessage: f => `${f.player} paid ${f.cost} points for a hint: ${f.hint}`,
       lengthProbabilities: [0,1,3,5,3,2,1,1,1,1]
     };
     Object.assign(this, defaults, options);
     this.defaultLang = Object.keys(this.wordList)[0];
-  }
-
-  loc(id, view) {
-    const foundTranslation = this[id];
-    switch (typeof foundTranslation) {
-      case 'string':
-        return foundTranslation;
-      case 'function':
-        return foundTranslation(view);
-      default:
-        return `{${id}}`;
-    }
+    this.loc = new Translation(this.translations).localize;
   }
 
   initStorage(storage) {

@@ -1,4 +1,5 @@
 import fetch from 'node-fetch';
+import Translation from './translation.js';
 
 class Pics {
   constructor(options) {
@@ -6,10 +7,13 @@ class Pics {
       commands: {
         getPicture: ['picture']
       },
-      getPictureDescription: 'Get a random cat picture',
+      translations: {
+        getPictureDescription: 'Get a random cat picture'
+      },
       pictureApiUrl: 'https://api.thecatapi.com/v1/images/search'
     }
     Object.assign(this, defaults, options);
+    this.loc = new Translation(this.translations).localize;
   }
 
   initEvents(events) {
@@ -35,7 +39,7 @@ class Pics {
     return [
       {
         command: `${this.commands.getPicture[0]}`,
-        description: this.getPictureDescription
+        description: this.loc('getPictureDescription')
       }
     ]
   }

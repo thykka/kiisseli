@@ -12,11 +12,9 @@ export default {
       ]
     },{
       name: 'dice',
-      //icons: ['⓿','❶','❷','❸','❹','❺','❻','❼','❽','❾']
-      //minSides: 2,
       maxSides: 9000,
       maxDice: 32,
-      translations: { // Don't do this, make a translation module or something
+      translations: {
         rollRandom_argTooSmall: 'liian pieni numero',
         rollRandom_argTooBig: 'liian iso numero',
         rollRandom_malformedNumber: 'tarvitsee numeron',
@@ -42,17 +40,19 @@ export default {
       commandsNewGame: ['solmu','s'],
       commandsShowScores: ['solmu.pisteet','s.'],
       commandsRequestHint: ['solmu.vihje','s?'],
-      newKnotMessage: f => `Uusi solmu: ${ f.flag } ${ f.knot }`,
-      showKnotMessage: f => `${ f.flag }\n\tSolmu: ${ f.knot }${ f.hint ? '\n\tVinkki: ' + f.hint : '' }`,
-      showCurrentPointsMessage: f => `sait ${ f.points } piste${ f.points == 1 ? 'en' : 'ttä' }! Yhteensä ${ f.total }`,
-      cannotBuyHintMessage: f => `Vinkki maksaa ${f.cost} pistettä, sinulla on vain ${f.points}`,
-      boughtHintMessage: f => `${f.player} osti vihjeen: ${f.hint}`,
-      gameActivity: f => `Solmu: ${f.knot}`,
-      descriptionNewGame: 'Näytä nykyinen solmu',
-      descriptionRequestHint: f => `Paljastaa yhden kirjaimen solmusta. Maksaa ${ f.cost } pistettä`,
-      descriptionShowScores: 'Näytä pisteet',
-      descriptionNewGameNumArg: 'Uusi solmu valitulla pituudella',
-      descriptionNewGameLangArg: 'Uusi solmu valitulla kielellä',
+      translations: {
+        newKnotMessage: v => `Uusi solmu: ${v.flag} ${v.knot}`,
+        showKnotMessage: v => `${v.flag}\n\tSolmu: ${v.knot}${v.hint?'\n\tVinkki: '+v.hint:''}`,
+        showCurrentPointsMessage: v => `sait ${v.points} piste${v.points==1?'en':'ttä'}! Yhteensä ${v.total}`,
+        cannotBuyHintMessage: v => `Vinkki maksaa ${v.cost} pistettä, sinulla on vain ${v.points}`,
+        boughtHintMessage: v => `${v.player} osti vihjeen: ${v.hint}`,
+        gameActivity: v => `Solmu: ${v.knot}`,
+        descriptionNewGame: 'Näytä nykyinen solmu',
+        descriptionRequestHint: v => `Paljastaa yhden kirjaimen solmusta. Maksaa ${ v.cost } pistettä`,
+        descriptionShowScores: 'Näytä pisteet',
+        descriptionNewGameNumArg: 'Uusi solmu valitulla pituudella',
+        descriptionNewGameLangArg: 'Uusi solmu valitulla kielellä',
+      },
       rightEmoji: '😻',
       wrongEmoji: '😸',
       defaultLang: 'fi',
@@ -64,16 +64,20 @@ export default {
         definition: ['sanakirja', 'sk']
       },
       language: 'fi',
-      noResultsMessage: 'Ei löytyny',
-      definitionError: 'Huppista saatana',
-      definitionTypeHint: 'Sana',
-      definitionDescription: 'Etsi sanan määritelmää (suomeksi)'
+      translations: {
+        noResultsMessage: 'Ei löytyny',
+        definitionError: 'Huppista saatana',
+        definitionTypeHint: 'Sana',
+        definitionDescription: 'Etsi sanan määritelmää (suomeksi)'
+      }
     },{
       name: 'pics',
       commands: {
         getPicture: ['kuva', 'k']
       },
-      getPictureDescription: 'Satunnainen kissakuva'
+      translations: {
+        getPictureDescription: 'Satunnainen kissakuva'
+      }
     }
   ]
 };

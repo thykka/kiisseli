@@ -1,3 +1,5 @@
+import Translation from './translation.js';
+
 class DiceGame {
   constructor(options) {
     const defaults = {
@@ -24,6 +26,7 @@ class DiceGame {
       }
     };
     Object.assign(this, defaults, options);
+    this.loc = new Translation(this.translations).localize;
   }
 
   async initStorage(Storage) {
@@ -41,17 +44,17 @@ class DiceGame {
   listCommands() {
     return [{
       command: this.commands.rollRandom[0],
-      description: this.translations.rollRandomDescription,
+      description: this.loc('rollRandomDescription'),
       args: [{
         command: `${this.commands.rollRandom[0]} <${this.minSides}-${this.maxSides}>`,
-        description: this.translations.rollRandomSidesDescription
+        description: this.loc('rollRandomSidesDescription')
       }]
     },{
       command: this.commands.rollDice[0],
-      description: this.translations.rollDiceDescription,
+      description: this.loc('rollDiceDescription'),
       args: [{
         command: `${this.commands.rollDice[0]} <1-${this.maxDice}>`,
-        description: this.translations.rollDiceCountDescription
+        description: this.loc('rollDiceCountDescription')
       }]
     }]
   }
@@ -60,7 +63,7 @@ class DiceGame {
     const count = typeof command.args[0] === 'number' ? command.args[0] : 5;
     if(count < 1 || count > this.maxDice) {
       message.reply(`${
-        this.translations.rollDice_validRange
+        this.loc('rollDice_validRange')
       } 1-${ this.maxDice }`);
       return;
     }
@@ -70,12 +73,12 @@ class DiceGame {
     const sum = dice.reduce((sum, v) => sum + v, 0);
     console.log(dice,sum);
     message.reply(`${
-      this.translations.rollDice_result
+      this.loc('rollDice_result')
     } ${
       dice.map(value => this.formatDie(value)).join(' ')
     }${
       count > 1
-        ? ` ${ this.translations.rollDice_total }: ${ sum }` 
+        ? ` ${ this.loc('rollDice_total') }: ${ sum }` 
         : ''
     }`);
   }
@@ -84,18 +87,18 @@ class DiceGame {
     const sides = typeof command.args[0] === 'number' ? command.args[0] : this.icons.length;
     switch (true) {
       case (sides < this.minSides):
-        message.reply(this.translations.rollRandom_argTooSmall);
+        message.reply(this.loc('rollRandom_argTooSmall'));
         return;
       case (sides > this.maxSides):
-        message.reply(this.translations.rollRandom_argTooBig)
+        message.reply(this.loc('rollRandom_argTooBig'))
         return;
       case (typeof sides === 'string'):
-        message.reply(this.translations.rollRandom_malformedNumber)
+        message.reply(this.loc('rollRandom_malformedNumber'))
         return;
     }
     const value = this.getSingle(sides);
     message.reply(`${
-      this.translations.rollRandom_result
+      this.loc('rollRandom_result')
     } ${
       sides === this.icons.length
         ? this.formatDie(value)
