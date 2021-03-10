@@ -1,11 +1,15 @@
 import _ from 'lodash';
+import Translation from './translation.js';
 import wordList from './knot-words.js';
 
 import wordListFinnish from '../wordgame-words-big.js';
 import Scores from './scores.js';
 
-const log = (...args) => console.log(...args);
-const { random, min, max } = Math;
+import { weighedRandom } from './weighedRandom.js';
+
+const log = (...args) => console.log(new Date(), ...args);
+const { max } = Math;
+
 class KnotGame {
   constructor(options) {
     const defaults = {
@@ -15,16 +19,19 @@ class KnotGame {
       commandsShowScores: ['kp', 'knot.points'],
       commandsRequestHint: ['kh', 'knot.hint'],
       allowedChannels: ['channel_id_goes_here'],
-      newKnotMessage: f => `New knot: ${ f.flag } ${ f.knot }`,
-      showKnotMessage: f => `Current knot: ${ f.flag } ${ f.knot } (${ f.hint })`,
-      announcePointsNewMessage: 'Points:',
-      announcePointsTotalMessage: 'Total:',
-      descriptionNewGame: 'Show current word',
-      descriptionRequestHint: `Reveal a letter's location`,
-      descriptionShowScores: 'Show hi-scores',
-      descriptionNewGameNumArg: 'Start new game with custom word length',
-      descriptionNewGameLangArg: 'Start new game with custom language',
-      gameActivity: f => `Knot: ${ f.knot }`,
+      translations: {
+        newKnotMessage: v => `New knot: ${v.flag} ${v.knot}`,
+        showKnotMessage: v => `Current knot: ${v.flag} ${v.knot} (${v.hint})`,
+        showCurrentPointsMessage: v => `You received ${v.points}, total: ${v.total}`,
+        cannotBuyHintMessage: v => `Hint costs ${v.cost}, you only have ${v.points}`,
+        boughtHintMessage: v => `${v.player} bought a hint: ${v.hint}`,
+        gameActivity: v => `Knot: ${v.knot}`,
+        descriptionNewGame: 'Show current word',
+        descriptionRequestHint: v => `Reveal a letter's location, costs ${v.cost} points`,
+        descriptionShowScores: 'Show hi-scores',
+        descriptionNewGameNumArg: 'Start new game with custom word length',
+        descriptionNewGameLangArg: 'Start new game with custom language',
+      },
       rightEmoji: '✅',
       wrongEmoji: '❌',
       wordList: {
@@ -37,27 +44,13 @@ class KnotGame {
       },
       defaultLang: 'en',
       defaultLength: 5,
-      minLength: 3,
-      maxLength: 10,
       maxShuffleAttempts: 500,
       hintCost: 1,
-      cannotBuyHintMessage: f => `Not enough points to buy hint (${f.points}/${f.cost})`,
-      boughtHintMessage: f => `${f.player} paid ${f.cost} points for a hint: ${f.hint}`
+      lengthProbabilities: [0,1,3,5,3,2,1,1,1,1]
     };
     Object.assign(this, defaults, options);
     this.defaultLang = Object.keys(this.wordList)[0];
-  }
-
-  loc(id, view) {
-    const foundTranslation = this[id];
-    switch (typeof foundTranslation) {
-      case 'string':
-        return foundTranslation;
-      case 'function':
-        return foundTranslation(view);
-      default:
-        return `{${id}}`;
-    }
+    this.loc = new Translation(this.translations).localize;
   }
 
   initStorage(storage) {
@@ -94,7 +87,7 @@ class KnotGame {
         description: this.loc('descriptionNewGame'),
         args: [
           {
-            command: `${this.commandsNewGame[0]} <${this.minLength}-${this.maxLength}>`,
+            command: `${this.commandsNewGame[0]} <${1}-${this.lengthProbabilities.length}>`,
             description: this.loc('descriptionNewGameNumArg')
           },{
             command: `${this.commandsNewGame[0]} <${Object.keys(this.wordList).join('/')}>`,
@@ -113,7 +106,6 @@ class KnotGame {
 
   async initGame() {
     const storedGame = await this.storage.getItem(this.storageKeyGame);
-    console.log(_.omit(storedGame, ['answer']));
     this.game = storedGame || await this.createGame(this.defaultLang, this.defaultLength);
     this.updateKnotActivity();
   }
@@ -124,48 +116,31 @@ class KnotGame {
     });
   }
 
-  nudgeLength(length) {
-    let newLength = length;
-    if(random() < 0.5) {
-      const rnd = random();
-      switch(true) {
-        case rnd<0.25:
-          newLength -= 2;
-          break;
-        case rnd<0.50:
-          newLength -= 1;
-          break;
-        case rnd<0.75:
-          newLength += 1;
-          break;
-        default:
-          newLength += 2;
-      }
-      newLength = max(this.minLength, min(newLength, this.maxLength));
-    }
-    return newLength;
-  }
-
   async createGame(lang = this.game.lang, length) {
-    const newLength = (
-      length && length >= this.minLength
+    let newLength = (
+      length &&
+      length > this.lengthProbabilities.findIndex(p => p > 0)
     ) ? length
-      : this.nudgeLength(this.game.length);
+      : weighedRandom(this.lengthProbabilities) + 1;
     const list = (
       this.wordList[lang] ||
       this.wordList[this.defaultLang]
     ).filter(word => word.length === newLength);
+    if(!list.length) {
+      this.channel.send('Nope.');
+      return this.createGame(lang, this.defaultLength);
+    }
     const answer = _.sample(list).toLowerCase();
     let knot = answer;
     let tries = 0;
     do {
       knot = _.shuffle([...answer]).join('');
       tries++;
-    } while(knot === answer && tries > this.maxShuffleAttempts)
+    } while(knot === answer && tries <= this.maxShuffleAttempts)
     const hints = '_'.repeat(answer.length);
     const game = { answer, knot, hints, lang, length: answer.length };
     await this.storage.setItem(this.storageKeyGame, game);
-    log(new Date(), _.omit(game, ['answer']));
+    log(_.omit(game, ['answer']));
     this.announceKnot(game.knot, lang, true);
     this.updateKnotActivity(game);
     return game;
@@ -204,10 +179,10 @@ class KnotGame {
   async processGuess(guess, message) {
     if(guess.toLowerCase() === this.game.answer) {
       message.react(this.rightEmoji);
-      const points = Math.max(1, (this.game.answer.length - 4) * 2);
+      const points = max(1, (this.game.answer.length - 4) * 2);
       const { username } = message.author;
       const result = await this.scores.modifyPlayerPoints(username, points);
-      message.reply(this.loc('showCurrentPointsMessage', { answer: this.game.answer, points, total: result }));
+      message.reply(this.loc('showCurrentPointsMessage', { points, total: result }));
       this.game = await this.createGame();
     } else {
       message.react(this.wrongEmoji);
@@ -225,14 +200,13 @@ class KnotGame {
     );
     const length = command.args.find(
       arg => typeof arg === 'number' &&
-      arg >= this.minLength
+      arg > 0
     );
     this.game = await this.createGame(lang, length);
   }
 
   async showScores({message}) {
     const scoresText = await this.scores.getHiscoreList();
-    log(scoresText);
     message.channel.send(scoresText);
   }
 
