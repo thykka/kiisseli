@@ -31,6 +31,8 @@ class KnotGame {
         descriptionShowScores: 'Show hi-scores',
         descriptionNewGameNumArg: 'Start new game with custom word length',
         descriptionNewGameLangArg: 'Start new game with custom language',
+        skipKnotMessage: v => `${ v.username } skipped the knot. Answer: ${ v.answer }`,
+        cannotAffordSkip: v => `Skipping costs ${ v.cost } points, you only have ${ v.points }`
       },
       rightEmoji: '✅',
       wrongEmoji: '❌',
@@ -46,6 +48,7 @@ class KnotGame {
       defaultLength: 5,
       maxShuffleAttempts: 500,
       hintCost: 1,
+      skipCost: 1,
       lengthProbabilities: [0,1,3,5,3,2,1,1,1,1]
     };
     Object.assign(this, defaults, options);
@@ -141,12 +144,20 @@ class KnotGame {
     const game = { answer, knot, hints, lang, length: answer.length };
     await this.storage.setItem(this.storageKeyGame, game);
     log(_.omit(game, ['answer']));
-    this.announceKnot(game.knot, lang, true);
+    this.announceKnot({
+      knot: game.knot,
+      lang,
+      isNew: true
+    });
     this.updateKnotActivity(game);
     return game;
   }
 
-  announceKnot(knot = this.game.knot, lang = this.game.lang, isNew = false) {
+  announceKnot({
+    knot = this.game.knot,
+    lang = this.game.lang,
+    isNew = false, // new knots don't display the hint
+  } = {}) {
     const view = {
       flag: this.flags[lang],
       knot: this.formatLetters(knot),
@@ -189,20 +200,32 @@ class KnotGame {
     }
   }
 
-  async newGame({command}) {
+  async newGame({message, command}) {
     if(!Array.isArray(command.args) || command.args.length === 0) {
       this.announceKnot();
       return;
     }
-    const lang = command.args.find(
-      arg => typeof arg === 'string' &&
-        Object.keys(this.wordList).includes(arg)
-    );
-    const length = command.args.find(
-      arg => typeof arg === 'number' &&
-      arg > 0
-    );
-    this.game = await this.createGame(lang, length);
+    await this.purchaseWithPoints({
+      message, cost: this.skipCost,
+      success: async playerPoints => {
+        const lang = command.args.find(
+          arg => typeof arg === 'string' &&
+            Object.keys(this.wordList).includes(arg)
+        );
+        const length = command.args.find(
+          arg => typeof arg === 'number' &&
+          arg > 0
+        );
+        this.channel.send(this.loc('skipKnotMessage', {
+          ...playerPoints,
+          answer: this.game.answer
+        }));
+        this.game = await this.createGame(lang, length);
+      },
+      fail: playerPoints => {
+        message.reply(this.loc('cannotAffordSkip', playerPoints));
+      }
+    })
   }
 
   async showScores({message}) {
@@ -211,25 +234,24 @@ class KnotGame {
   }
 
   async requestHint({message}) {
-    const { username } = message.author;
-    const currentPoints = await this.scores.getPlayerPoints(username);
-    if(currentPoints < this.hintCost) {
-      message.reply(this.loc('cannotBuyHintMessage', {
-        cost: this.hintCost,
-        points: currentPoints
-      }));
-      return;
-    }
-    const pointsLeft = await this.scores.modifyPlayerPoints(username, -this.hintCost);
-    const hint = this.randomHint();
-    this.game.hints = hint;
-    await this.storage.setItem(this.storageKeyGame, this.game);
-    message.channel.send(this.loc('boughtHintMessage', {
-      player: username,
-      cost: this.hintCost,
-      left: pointsLeft,
-      hint: this.formatLetters(hint)
-    }));
+    await this.purchaseWithPoints({
+      message, cost: this.hintCost,
+      success: async ({ points, username, cost }) => {
+        const hint = this.randomHint();
+        this.game.hints = hint;
+        await this.storage.setItem(this.storageKeyGame, this.game);
+
+        message.channel.send(this.loc('boughtHintMessage', {
+          hint: this.formatLetters(hint),
+          cost,
+          player: username,
+          left: points
+        }));
+      },
+      fail: playerPoints => {
+        message.reply(this.loc('cannotBuyHintMessage', playerPoints));
+      }
+    });
   }
 
   randomHint() {
@@ -245,6 +267,21 @@ class KnotGame {
 
   formatHint(hint) {
     return [...hint].map(l => `\`${l}\` `).join('');
+  }
+
+  async purchaseWithPoints({message, cost, success, fail}) {
+    const { username } = message.author;
+    const currentPoints = await this.scores.getPlayerPoints(username);
+    if(currentPoints < cost) {
+      if(typeof fail === 'function') fail({
+        message, points: currentPoints, cost, username
+      });
+      return;
+    }
+    const pointsLeft = await this.scores.modifyPlayerPoints(username, -cost);
+    if (typeof success === 'function') success({
+      message, points: pointsLeft, cost, username
+    });
   }
 }
 
