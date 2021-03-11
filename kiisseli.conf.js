@@ -81,6 +81,11 @@ export default {
       translations: {
         getPictureDescription: 'Satunnainen kissakuva'
       }
+    },{
+      name: 'compliment',
+      commands: {
+        compliment: ['kehu', '<3']
+      }
     }
   ]
 };
