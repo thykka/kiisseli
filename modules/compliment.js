@@ -16,23 +16,27 @@ class Compliment extends Custard {
   }
 
   compliment({ message, command }) {
-
     fetch(this.apiUrl).then(r=>r.json()).then(r=>{
+      const { compliment } = r;
       const targetIds = command.args
         .map(arg => {
-          const match = arg.match(/<@!(\d+)>/);
+          let match = arg.match(/<@!(\d+)>/) || arg.match(/@?(.+)/);
           return match && match.length > 1 && match[1];
         }).filter(Boolean);
       if(!targetIds.length) {
-        message.reply(r.compliment);
+        message.reply(`${compliment} 🥰`);
         return;
       }
       targetIds.forEach(targetId => {
         const foundUser = this.client.users.cache
-          .find(user => user.id === targetId);
+          .find(user => [user.id, user.username].includes(targetId));
         if(!foundUser) return;
-        console.log(foundUser);
-        foundUser.send(`${r.compliment} 😻`);
+        
+        foundUser.send(`${compliment} 😻`);
+        console.log(new Date(), {
+          complimentFrom: message.author.username,
+          args: command.args
+        });
       });
     });
   }
