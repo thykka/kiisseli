@@ -129,7 +129,7 @@ class Brain {
       .trim().split(/\s/g)
       .filter(arg=>arg)
       .map(arg => this.stringToIntMaybe(arg));
-    return { name: name.toLowerCase(), args };
+    return { name: (name || '').toLowerCase(), args };
   }
 
   stringToIntMaybe(arg) {
