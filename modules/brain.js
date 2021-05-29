@@ -70,7 +70,13 @@ class Brain {
     const instance = new module.default({...config, name});
     this.initModuleStorage(instance);
     this.initModuleEvents(instance);
+    this.initModuleClient(instance);
     return instance;
+  }
+
+  initModuleClient(instance) {
+    if(typeof instance.initClient !== 'function') return;
+    instance.initClient(this.client);
   }
 
   initModuleEvents(instance) {
@@ -123,7 +129,7 @@ class Brain {
       .trim().split(/\s/g)
       .filter(arg=>arg)
       .map(arg => this.stringToIntMaybe(arg));
-    return { name: name.toLowerCase(), args };
+    return { name: (name || '').toLowerCase(), args };
   }
 
   stringToIntMaybe(arg) {
