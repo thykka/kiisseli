@@ -43,7 +43,7 @@ export default {
       translations: {
         newKnotMessage: v => `Uusi ${v.points} pisteen solmu: ${v.flag} ${v.knot}`,
         showKnotMessage: v => `${v.flag}\n\tSolmu: ${v.knot} (${v.points}p)${v.hint?'\n\tVinkki: '+v.hint:''}`,
-        showCurrentPointsMessage: v => `sait ${v.points} piste${v.points==1?'en':'ttä'}! Yhteensä ${v.total}`,
+        showCurrentPointsMessage: v => `${v.answer} oli oikein! ${v.total - v.points}**+${v.points}** = ${v.total}p`,
         cannotBuyHintMessage: v => `Vinkki maksaa ${v.cost} piste${v.cost==1?'en':'ttä'}, sinulla on vain ${v.points}`,
         boughtHintMessage: v => `${v.player} osti vihjeen: ${v.hint}`,
         gameActivity: v => `Solmu: ${v.knot}`,

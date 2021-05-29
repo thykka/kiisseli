@@ -203,7 +203,7 @@ class KnotGame {
 
   handleMessage(message) {
     if(!this.allowedChannels.includes(message.channel.id)) return;
-    const word = message.content.split(/\s/)[0];
+    const word = message.content.replace(/\s/g,'');
     if(!word || !this.hasCorrectLetters(word)) return;
     this.processGuess(word, message);
   }
@@ -220,7 +220,9 @@ class KnotGame {
       const points = this.wordPoints(this.game.answer);
       const { username } = message.author;
       const result = await this.scores.modifyPlayerPoints(username, points);
-      message.reply(this.loc('showCurrentPointsMessage', { points, total: result }));
+      message.reply(this.loc('showCurrentPointsMessage', {
+        points, total: result, answer: this.formatHint(this.game.answer.toUpperCase())
+      }));
       this.game = await this.createGame();
     } else {
       message.react(this.wrongEmoji);
