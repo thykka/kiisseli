@@ -42,6 +42,7 @@ class KnotGame {
       defaultLength: 5,
       maxShuffleAttempts: 500,
       hintCost: 1,
+      hintDifficulty: 4,
       skipCost: 1,
       lengthProbabilities: [0,1,3,5,3,2,1,1,1,1]
     };
@@ -216,7 +217,6 @@ class KnotGame {
   async processGuess(guess, message) {
     if(guess.toLowerCase() === this.game.answer) {
       message.react(this.rightEmoji);
-      //const points = max(1, (this.game.answer.length - 4) * 2);
       const points = this.wordPoints(this.game.answer);
       const { username } = message.author;
       const result = await this.scores.modifyPlayerPoints(username, points);
@@ -286,9 +286,10 @@ class KnotGame {
       if(letter === '_') return [...acc, index];
       return acc;
     },[]);
-    const revealIndex = _.sample(hiddenIndexes);
+    const revealIndexes = Array.from({ length: Math.round(Math.max(1, hiddenIndexes.length / this.hintDifficulty)) })
+      .map(() => _.sample(hiddenIndexes));
     return [...this.game.hints].map((letter, index) => {
-      return index === revealIndex ? this.game.answer[revealIndex] : letter
+      return revealIndexes.includes(index) ? this.game.answer[index] : letter;
     }).join('');
   }
 

@@ -58,8 +58,9 @@ export default {
       rightEmoji: '😻',
       wrongEmoji: '😸',
       defaultLang: 'fi',
-      hintCost: 2,
-      skipCost: 4,
+      hintCost: 3,
+      hintDifficulty: 3,
+      skipCost: 8,
       lengthProbabilities: [0,1,1,10,20,10,5,2,1,1,1,1]
     },{
       name: 'dictionary',
