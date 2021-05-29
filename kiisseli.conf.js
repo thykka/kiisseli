@@ -41,8 +41,8 @@ export default {
       commandsShowScores: ['solmu.pisteet','s.'],
       commandsRequestHint: ['solmu.vihje','s?'],
       translations: {
-        newKnotMessage: v => `Uusi solmu: ${v.flag} ${v.knot}`,
-        showKnotMessage: v => `${v.flag}\n\tSolmu: ${v.knot}${v.hint?'\n\tVinkki: '+v.hint:''}`,
+        newKnotMessage: v => `Uusi ${v.points} pisteen solmu: ${v.flag} ${v.knot}`,
+        showKnotMessage: v => `${v.flag}\n\tSolmu: ${v.knot} (${v.points}p)${v.hint?'\n\tVinkki: '+v.hint:''}`,
         showCurrentPointsMessage: v => `sait ${v.points} piste${v.points==1?'en':'ttä'}! Yhteensä ${v.total}`,
         cannotBuyHintMessage: v => `Vinkki maksaa ${v.cost} piste${v.cost==1?'en':'ttä'}, sinulla on vain ${v.points}`,
         boughtHintMessage: v => `${v.player} osti vihjeen: ${v.hint}`,
@@ -83,6 +83,9 @@ export default {
       }
     },{
       name: 'compliment',
+      translations: {
+        description_compliment: ':3'
+      },
       commands: {
         compliment: ['kehu', '<3']
       }

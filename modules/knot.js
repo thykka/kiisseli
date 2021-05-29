@@ -1,14 +1,10 @@
 import _ from 'lodash';
 import Translation from './translation.js';
-import wordList from './knot-words.js';
-
-import wordListFinnish from '../wordgame-words-big.js';
 import Scores from './scores.js';
-
+import { calculatePoints } from '../modules/wordlist-utils.js';
 import { weighedRandom } from './weighedRandom.js';
 
 const log = (...args) => console.log(new Date(), ...args);
-const { max } = Math;
 
 class KnotGame {
   constructor(options) {
@@ -20,8 +16,8 @@ class KnotGame {
       commandsRequestHint: ['kh', 'knot.hint'],
       allowedChannels: ['channel_id_goes_here'],
       translations: {
-        newKnotMessage: v => `New knot: ${v.flag} ${v.knot}`,
-        showKnotMessage: v => `Current knot: ${v.flag} ${v.knot} (${v.hint})`,
+        newKnotMessage: v => `New knot: ${v.flag} ${v.knot} - [${v.points}]`,
+        showKnotMessage: v => `Current knot: ${v.flag} ${v.knot} - [${v.points}] - (${v.hint})`,
         showCurrentPointsMessage: v => `You received ${v.points}, total: ${v.total}`,
         cannotBuyHintMessage: v => `Hint costs ${v.cost}, you only have ${v.points}`,
         boughtHintMessage: v => `${v.player} bought a hint: ${v.hint}`,
@@ -36,10 +32,6 @@ class KnotGame {
       },
       rightEmoji: '✅',
       wrongEmoji: '❌',
-      wordList: {
-        en: wordList,
-        fi: wordListFinnish
-      },
       flags: {
         en: '🇬🇧',
         fi: '🇫🇮'
@@ -52,7 +44,18 @@ class KnotGame {
       lengthProbabilities: [0,1,3,5,3,2,1,1,1,1]
     };
     Object.assign(this, defaults, options);
-    this.defaultLang = Object.keys(this.wordList)[0];
+    (async () => {
+      const languages = Object.keys(this.flags);
+      this.defaultLang = languages[0];
+      this.wordList = await this.initWordList(languages);
+      /*
+      this.letterOccurrences = Object.fromEntries(
+        Object.entries(this.wordList).map(
+          ([lang, list]) => [lang, countOccurrences(list)]
+        )
+      );
+      */
+    })();
     this.loc = new Translation(this.translations).localize;
   }
 
@@ -75,6 +78,13 @@ class KnotGame {
       this.channel = client.channels.cache.get(this.allowedChannels[0]);
       this.initGame();
     });
+  }
+
+  async initWordList(languages) {
+    // better not touch this...
+    const loadLang = async lang => await import(`./wordlist-${lang}.js`).then(m=>m.default);
+    let wordLists = await Promise.all(languages.map(l=>loadLang(l)));
+    return Object.fromEntries(languages.map((l,i)=>([l,wordLists[i]])));
   }
 
   _initCommandEvents(commands, handler) {
@@ -144,9 +154,11 @@ class KnotGame {
     const game = { answer, knot, hints, lang, length: answer.length };
     await this.storage.setItem(this.storageKeyGame, game);
     log(_.omit(game, ['answer']));
+    const points = calculatePoints(this.wordList[lang], answer);
     this.announceKnot({
       knot: game.knot,
       lang,
+      points,
       isNew: true
     });
     this.updateKnotActivity(game);
@@ -156,11 +168,13 @@ class KnotGame {
   announceKnot({
     knot = this.game.knot,
     lang = this.game.lang,
+    points = calculatePoints(this.wordList[this.game.lang], this.game.answer),
     isNew = false, // new knots don't display the hint
   } = {}) {
     const view = {
       flag: this.flags[lang],
       knot: this.formatLetters(knot),
+      points,
       hint: this.game.hints === '_'.repeat(this.game.hints.length)
         ? null
         : this.formatLetters(this.game.hints)
@@ -190,7 +204,8 @@ class KnotGame {
   async processGuess(guess, message) {
     if(guess.toLowerCase() === this.game.answer) {
       message.react(this.rightEmoji);
-      const points = max(1, (this.game.answer.length - 4) * 2);
+      //const points = max(1, (this.game.answer.length - 4) * 2);
+      const points = calculatePoints(this.wordList[this.game.lang], this.game.answer);
       const { username } = message.author;
       const result = await this.scores.modifyPlayerPoints(username, points);
       message.reply(this.loc('showCurrentPointsMessage', { points, total: result }));
