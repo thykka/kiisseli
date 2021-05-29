@@ -1,7 +1,9 @@
 import _ from 'lodash';
 import Translation from './translation.js';
 import Scores from './scores.js';
-import { calculatePoints } from '../modules/wordlist-utils.js';
+import {
+  calculatePoints, countOccurrences, countWordsByLengths, normalizeByMax
+} from '../modules/wordlist-utils.js';
 import { weighedRandom } from './weighedRandom.js';
 
 const log = (...args) => console.log(new Date(), ...args);
@@ -48,15 +50,25 @@ class KnotGame {
       const languages = Object.keys(this.flags);
       this.defaultLang = languages[0];
       this.wordList = await this.initWordList(languages);
-      /*
-      this.letterOccurrences = Object.fromEntries(
+      this.letterOccurrences = normalizeByMax(Object.fromEntries(
         Object.entries(this.wordList).map(
           ([lang, list]) => [lang, countOccurrences(list)]
         )
-      );
-      */
+      ));
+      this.wordLengthOccurrences = normalizeByMax(Object.fromEntries(
+        Object.entries(this.wordList).map(
+          ([lang, list]) => [lang, countWordsByLengths(list)]
+        )
+      ));
     })();
     this.loc = new Translation(this.translations).localize;
+  }
+
+  wordPoints(word) {
+    return calculatePoints(
+      this.wordList[this.game.lang], word,
+      this.letterOccurrences[this.game.lang], this.wordLengthOccurrences[this.game.lang]
+    );
   }
 
   initStorage(storage) {
@@ -154,10 +166,10 @@ class KnotGame {
     const game = { answer, knot, hints, lang, length: answer.length };
     await this.storage.setItem(this.storageKeyGame, game);
     log(_.omit(game, ['answer']));
-    const points = calculatePoints(this.wordList[lang], answer);
+    const points = this.wordPoints(answer);
     this.announceKnot({
       knot: game.knot,
-      lang,
+      lang: game.lang,
       points,
       isNew: true
     });
@@ -168,7 +180,7 @@ class KnotGame {
   announceKnot({
     knot = this.game.knot,
     lang = this.game.lang,
-    points = calculatePoints(this.wordList[this.game.lang], this.game.answer),
+    points = this.wordPoints(this.game.answer),
     isNew = false, // new knots don't display the hint
   } = {}) {
     const view = {
@@ -205,7 +217,7 @@ class KnotGame {
     if(guess.toLowerCase() === this.game.answer) {
       message.react(this.rightEmoji);
       //const points = max(1, (this.game.answer.length - 4) * 2);
-      const points = calculatePoints(this.wordList[this.game.lang], this.game.answer);
+      const points = this.wordPoints(this.game.answer);
       const { username } = message.author;
       const result = await this.scores.modifyPlayerPoints(username, points);
       message.reply(this.loc('showCurrentPointsMessage', { points, total: result }));

@@ -35,8 +35,8 @@ function Sum(sum, value) {
   return sum + value;
 }
 
-function calculatePoints(list, word) {
-  const occurrences = normalizeByMax(countLetterOccurrences(list));
+function calculatePoints(list, word, occurrences, lengths) {
+  occurrences = occurrences || normalizeByMax(countLetterOccurrences(list));
   const letterCommonRatio = [...(word || '')].reduce((pts, letter) => {
     pts.push(
       occurrences[letter.toUpperCase()]
@@ -44,7 +44,7 @@ function calculatePoints(list, word) {
     return pts;
   },[]);
   
-  const lengths = normalizeByMax(countWordsByLengths(list));
+  lengths = lengths || normalizeByMax(countWordsByLengths(list));
   const wordLengthRatio = lengths[(word || '').length] || 0;
 
   return Math.floor(
