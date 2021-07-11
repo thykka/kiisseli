@@ -90,6 +90,16 @@ export default {
       commands: {
         compliment: ['kehu', '<3']
       }
+    },{
+      name: 'numbers',
+      translations: {
+        description_startGame: 'woot',
+        description_registerAnswer: 'hoot'
+      },
+      commands: {
+        startGame: ['num'],
+        registerAnswer: ['=']
+      }
     }
   ]
 };
