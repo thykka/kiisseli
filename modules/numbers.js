@@ -7,8 +7,8 @@ class Numbers {
         startGame: ['numbers'],
         registerAnswer: ['=']
       },
-      intervalSeconds: 60,
-      notifyIntervalSeconds: 20
+      intervalSeconds: 5 * 60,
+      notifyIntervalSeconds: 60
     }
     Object.assign(this, defaults, options);
   }
