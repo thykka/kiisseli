@@ -1,5 +1,6 @@
 import _ from 'lodash';
-import { init as initExpression, formula } from "expressionparser";
+import expressionparser from 'expressionparser';
+const { init: initExpression, formula } = expressionparser;
 const parser = initExpression(formula);
 
 const allowedOps = '+-*/'.split``;
@@ -114,7 +115,7 @@ class NumbersGame {
     const topPlayers = this.players.sort((a, b) => {
       return a.answers[0].difference - b.answers[0].difference;
     });
-    
+
     return {
       player: topPlayers[0].name,
       ...topPlayers[0].answers[0]
