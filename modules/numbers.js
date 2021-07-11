@@ -33,7 +33,7 @@ class Numbers {
       const formattedNumbers = this.game.numbers.map(n => this.formatNumber(n)).join(', ');
       message.channel.send([
         `${ player } started a new numbers game!`,
-        `Target: ${ formattedTarget }`,
+        `🎯 Target: ${ formattedTarget }`,
         `Numbers: ${ formattedNumbers }`,
         `${ this.formatNumber(this.intervalSeconds) }s left to submit the first answer.`
       ].join('\n'));
