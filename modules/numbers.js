@@ -64,7 +64,7 @@ class Numbers {
         this.formatNumber(expression + ' = ' + result)
       }) is off target (🎯${
         this.formatNumber(this.game.targetNumber)
-      })  by ${ this.formatNumber(this.game.targetNumber - result) }`,
+      })  by ${ this.formatNumber(result - this.game.targetNumber) }`,
       `time extended, ${
         this.formatNumber(this.intervalSeconds)
       }s left to submit answers.`
