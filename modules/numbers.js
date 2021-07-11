@@ -33,7 +33,7 @@ class Numbers {
       const formattedNumbers = this.game.numbers.map(n => this.formatNumber(n)).join(', ');
       message.channel.send([
         `${ player } started a new numbers game!`,
-        `🎯 Target: ${ formattedTarget }`,
+        `Target: 🎯${ formattedTarget }`,
         `Numbers: ${ formattedNumbers }`,
         `${ this.formatNumber(this.intervalSeconds) }s left to submit the first answer.`
       ].join('\n'));
@@ -62,7 +62,9 @@ class Numbers {
     message.reply([
       `your solution (${
         this.formatNumber(expression + ' = ' + result)
-      }) is off target by ${ this.formatNumber(difference) }`,
+      }) is off target (🎯${
+        this.formatNumber(this.game.targetNumber)
+      })  by ${ this.formatNumber(this.game.targetNumber - result) }`,
       `time extended, ${
         this.formatNumber(this.intervalSeconds)
       }s left to submit answers.`
@@ -100,7 +102,9 @@ class Numbers {
   handleNotify() {
     const now = Date.now();
     const elapsedSeconds = Math.round((now - this.gameStarted) / 1000);
-    this.channel.send(`Time left: ${ this.intervalSeconds - elapsedSeconds }s`)
+    this.channel.send(`Time left: ${
+      this.formatNumber(this.intervalSeconds - elapsedSeconds)
+    }s - Target: 🎯${ this.formatNumber(this.game.targetNumber) }`);
   }
 
   handleTimerTriggered() {
@@ -120,7 +124,9 @@ class Numbers {
       } else {
         messages.push(`${
           bestAnswer.player
-        } wins the round, missing the target by ${
+        } wins the round, missing the target (🎯${
+          this.formatNumber(this.game.targetNumber)
+        }) by ${
           bestAnswer.difference
         }:`)
       }
