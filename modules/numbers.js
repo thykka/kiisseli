@@ -8,7 +8,7 @@ class Numbers {
         registerAnswer: ['=']
       },
       intervalSeconds: 5 * 60,
-      notifyIntervalSeconds: 60
+      notifyIntervalSeconds: 4 * 60
     }
     Object.assign(this, defaults, options);
   }
