@@ -56,6 +56,7 @@ class Numbers {
       return;
     }
     const player = message.author.username;
+    const best = this.game.getBestAnswer();
     const added = this.game.addAnswer(player, command.args.join(' '));
     if(!added) {
       message.react('❌');
@@ -67,19 +68,31 @@ class Numbers {
       this.handleTimerTriggered();
       return;
     }
-    const offset = result - this.game.targetNumber;
-    message.react('✔');
-    message.reply([
+    const isPositive = result - this.game.targetNumber > 0;
+    const reply = [
       `your solution (${
         this.formatNumber(expression + ' = ' + result)
       }) is off target (🎯${
         this.formatNumber(this.game.targetNumber)
-      }) by ${ offset > 0 ? '+' : '' }${ this.formatNumber(offset) }`,
-      `time extended, ${
+      }) by ${
+        this.formatNumber((isPositive ? '+' : '-') + difference)
+      }`
+    ];
+    console.log(best)
+    if(!best || best.difference > difference) {
+      this.restartTimer();
+      message.react('🥇');
+      reply.push(`${ player } took first place!`);
+      reply.push(`time extended, ${
         this.formatNumber(this.intervalSeconds)
-      }s left to submit answers.`
-    ].join('\n'));
-    this.restartTimer();
+      }s left to submit answers.`)
+    } else {
+      message.react('✅');
+      reply.push(`${ best.player } has first place with ${
+        this.formatNumber(best.result)
+      }`);
+    }
+    message.reply(reply.join('\n'));
   }
 
   restartTimer() {
