@@ -22,20 +22,18 @@ class Numbers {
   }
 
   startGame({message, command}) {
-    const player = message.author.username;
     // new round
     if(!this.game) {
       this.createGame({
         channel: message.channel,
         smalls: command.args.length ? +(command.args[0]) : null
       });
-      const formattedTarget = this.formatNumber(this.game.targetNumber);
-      const formattedNumbers = this.game.numbers.map(n => this.formatNumber(n)).join(', ');
       message.channel.send([
-        `${ player } started a new numbers game!`,
-        `Target: 🎯${ formattedTarget }`,
-        `Numbers: ${ formattedNumbers }`,
-        `${ this.formatNumber(this.intervalSeconds) }s left to submit the first answer.`
+        `${ message.author.username } started a new numbers game with ${
+          this.formatNumber(this.intervalSeconds)
+        }s countdown:`,
+        `Target: 🎯${ this.formatNumber(this.game.targetNumber) }`,
+        `Numbers: ${ this.formattedNumbers() }`,
       ].join('\n'));
       this.restartTimer();
     } else {
@@ -43,28 +41,40 @@ class Numbers {
     }
   }
 
+  formattedNumbers() {
+    if(!this.game) return '(n/a)';
+    return this.game.numbers.map(n => this.formatNumber(n)).join(', ');
+  }
+
   registerAnswer({message, command}) {
     if(!this.game) {
-      message.reply(`no numbers game in progress. Type \`.${ this.commands.startGame[0] }\` to begin a new round.`);
+      message.reply(
+        `no numbers game in progress. Type \`.${
+          this.commands.startGame[0]
+        }\` to begin a new round.`
+      );
       return;
     }
     const player = message.author.username;
     const added = this.game.addAnswer(player, command.args.join(' '));
     if(!added) {
-      message.reply(`that's not a valid answer`);
+      message.react('❌');
       return;
     }
     const { expression, result, difference } = added;
     if(difference <= Math.pow(2, -52)) {
+      message.react('🎯');
       this.handleTimerTriggered();
       return;
     }
+    const offset = result - this.game.targetNumber;
+    message.react('✔');
     message.reply([
       `your solution (${
         this.formatNumber(expression + ' = ' + result)
       }) is off target (🎯${
         this.formatNumber(this.game.targetNumber)
-      })  by ${ this.formatNumber(result - this.game.targetNumber) }`,
+      }) by ${ offset > 0 ? '+' : '' }${ this.formatNumber(offset) }`,
       `time extended, ${
         this.formatNumber(this.intervalSeconds)
       }s left to submit answers.`
@@ -104,7 +114,9 @@ class Numbers {
     const elapsedSeconds = Math.round((now - this.gameStarted) / 1000);
     this.channel.send(`Time left: ${
       this.formatNumber(this.intervalSeconds - elapsedSeconds)
-    }s - Target: 🎯${ this.formatNumber(this.game.targetNumber) }`);
+    }s - Target: 🎯${
+      this.formatNumber(this.game.targetNumber)
+    } - Numbers: ${ this.formattedNumbers() }`);
   }
 
   handleTimerTriggered() {
@@ -147,7 +159,6 @@ class Numbers {
     const gameSettings = {};
     if(smalls) gameSettings.split = smalls;
     this.game = new NumbersGame(gameSettings);
-    console.log(this.game)
   }
 }
 
