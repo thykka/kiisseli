@@ -37,7 +37,9 @@ class Numbers {
       ].join('\n'));
       this.restartTimer();
     } else {
-      message.reply(`Numbers game already started. Type \`.${ this.commands.registerAnswer[0] } [equation]\` to attempt`);
+      message.reply(`Numbers game already started. Type \`.${
+        this.commands.registerAnswer[0]
+      } [equation]\` to submit your solution`);
     }
   }
 
@@ -70,11 +72,11 @@ class Numbers {
     }
     const isPositive = result - this.game.targetNumber > 0;
     const reply = [
-      `your solution (${
+      `your solution ${
         this.formatNumber(expression + ' = ' + result)
-      }) is off target (🎯${
+      } is off target 🎯${
         this.formatNumber(this.game.targetNumber)
-      }) by ${
+      } by ${
         this.formatNumber((isPositive ? '+' : '-') + difference)
       }`
     ];
@@ -149,9 +151,9 @@ class Numbers {
       } else {
         messages.push(`${
           bestAnswer.player
-        } wins the round, missing the target (🎯${
+        } wins the round, missing the target 🎯${
           this.formatNumber(this.game.targetNumber)
-        }) by ${
+        } by ${
           bestAnswer.difference
         }:`)
       }
