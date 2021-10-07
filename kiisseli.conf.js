@@ -133,7 +133,6 @@ export default {
           difficulty: 0.67
         }
       ],
-      units: [['sekunnin','sekuntia'],['minuutin','minuuttia'],['tunnin','tuntia'],['päivän','päivää'],['kuukauden','kuukautta']],
       statusMessage: v => `${v.successCount} kissa${v.successCount>1?'a':'n'}. Kissa sai odottaa ${v.reactionTime}`
     }
   ]

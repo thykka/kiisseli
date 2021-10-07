@@ -18,7 +18,6 @@ export default class Cat  {
           difficulty: 0.5
         }
       ],
-      units: [['second','seconds'],['minute','minutes'],['hour','hours'],['day','days'],['month','months']],
       statusMessage: v => `${v.successCount} cat${v.successCount>1?'s':''}. Cat had to wait for ${v.reactionTime}`
     };
     Object.assign(this, defaults, options);
@@ -79,15 +78,7 @@ export default class Cat  {
 
   formatMS(ms) {
     const seconds = ms / 1000;
-    const minutes = seconds / 60;
-    const hours = minutes / 60;
-    const days = hours / 24;
-    const months = days / 30;
-    return [seconds,minutes,hours,days,months]
-      .filter(amount => amount >= 1)
-      .map((amount, index) => `${ Math.floor(amount) } ${
-        this.units[index][amount < 2 ? 0 : 1]
-      }`).join(', ')
+    return Math.round(seconds) + 's';
   }
 
   async performAction({ action, message }) {
