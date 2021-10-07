@@ -45,7 +45,7 @@ export default class Cat  {
   initGame() {
     this.appearTime = false;
     const interval = this.interval * Math.random();
-    console.log(`Cat incoming: ${interval/1000|0}s`);
+    console.log(`Cat incoming: ${ this.formatMS(interval) }`);
     this.timeoutId = setTimeout(this.boundAppear, interval);
   }
 
