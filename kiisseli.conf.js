@@ -104,7 +104,7 @@ export default {
       name: 'cat',
       //channelId: '813884640926105620', // #kiisseli
       channelId: '813896696492326953', // #kiisseli-beta
-      interval: 1000 * 60 * 60 * 24,
+      interval: 1000 * 60 * 60 * 6,
       appearMessages: [
         '/ᐠ.ꞈ.ᐟ\\ -miau',
         '^•ﻌ•^ฅ -kurnau'
