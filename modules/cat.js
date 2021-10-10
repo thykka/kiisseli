@@ -1,4 +1,5 @@
 import Scores from './scores.js';
+import MsToHuman from './ms-to-human.js';
 
 export default class Cat  {
   constructor(options) {
@@ -18,7 +19,8 @@ export default class Cat  {
           difficulty: 0.5
         }
       ],
-      statusMessage: v => `${v.successCount} cat${v.successCount>1?'s':''}. Cat had to wait for ${v.reactionTime}`
+      statusMessage: v => `${v.successCount} cat${v.successCount>1?'s':''}. Cat had to wait for ${v.reactionTime}`,
+      msFormatter: MsToHuman
     };
     Object.assign(this, defaults, options);
     this.boundAppear = this.appear.bind(this);
@@ -44,7 +46,7 @@ export default class Cat  {
   initGame() {
     this.appearTime = false;
     const interval = this.interval * Math.random();
-    console.log(`Cat incoming: ${ this.formatMS(interval) }`);
+    console.log(`Cat incoming: ${ this.msFormatter(interval) }`);
     this.timeoutId = setTimeout(this.boundAppear, interval);
   }
 
@@ -76,11 +78,6 @@ export default class Cat  {
     );
   }
 
-  formatMS(ms) {
-    const seconds = ms / 1000;
-    return Math.round(seconds) + 's';
-  }
-
   async performAction({ action, message }) {
     if(!this.appearTime) {
       message.reply(action.invalid);
@@ -94,7 +91,7 @@ export default class Cat  {
       );
       const reactionTime = (Date.now() - this.appearTime);
       const status = this.statusMessage({
-        reactionTime: this.formatMS(reactionTime),
+        reactionTime: this.msFormatter(reactionTime),
         successCount
       });
       const result = `${action.success} ${status}`;
