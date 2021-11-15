@@ -90,6 +90,50 @@ export default {
       commands: {
         compliment: ['kehu', '<3']
       }
+    },{
+      name: 'numbers',
+      translations: {
+        description_startGame: 'woot',
+        description_registerAnswer: 'hoot'
+      },
+      commands: {
+        startGame: ['num'],
+        registerAnswer: ['=']
+      }
+    },{
+      name: 'cat',
+      //channelId: '813884640926105620', // #kiisseli
+      channelId: '813896696492326953', // #kiisseli-beta
+      interval: 1000 * 60 * 60 * 2,
+      appearMessages: [
+        '/ᐠ.ꞈ.ᐟ\\ -miau',
+        '^•ﻌ•^ฅ -kurnau'
+      ],
+      scoresCommand: 'miau',
+      actions: [
+        {
+          trigger: 'silitä',
+          success: 'Kissa kehrää! Olet silittänyt',
+          failure: 'Kissa kävelee ohitsesi, yritä uudelleen.',
+          invalid: 'Ei ole mitään silitettävää :(',
+          difficulty: 0.33
+        },
+        {
+          trigger: 'hätistä',
+          success: 'Kissa pinkaisee karkuun! Olet hätistänyt',
+          failure: 'Kissaa ei näytä kiinnostavan, yritä uudelleen.',
+          invalid: 'Ketä oikein hätistelet? Ei täällä mitään ole!',
+          difficulty: 0.5
+        },
+        {
+          trigger: 'rapsuta',
+          success: 'Kissa kiehnää tyytyväisenä! Olet rapsuttanut',
+          failure: 'Kissa kellahtaa selälleen ja raapii, yritä uudelleen.',
+          invalid: 'Erikoista tyhjänrapsuttelua..',
+          difficulty: 0.67
+        }
+      ],
+      statusMessage: v => `${v.successCount} kissa${v.successCount>1?'a':'n'}. Kissa sai odottaa ${v.reactionTime}`
     }
   ]
 };

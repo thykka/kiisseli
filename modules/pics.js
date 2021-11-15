@@ -24,7 +24,7 @@ class Pics {
     });
   }
 
-  getPicture({ message, command }) {
+  getPicture({ message }) {
     fetch(this.pictureApiUrl)
       .then(res=>res.json())
       .then(res=>{
