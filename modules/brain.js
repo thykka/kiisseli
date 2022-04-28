@@ -99,6 +99,7 @@ class Brain {
         ? mod.listCommands().map(result => `${ this.formatCommand(result) }`)
         : false)
       .filter(text => text !== false)
+      .sort()
       .join('\n');
     message.reply(`${ this.commandsDescription }\n${ helpCommandText }\n${ commandsText }`);
   }

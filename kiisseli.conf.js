@@ -82,7 +82,7 @@ export default {
       translations: {
         getPictureDescription: 'Satunnainen kissakuva'
       }
-    },{
+    },/*{
       name: 'compliment',
       translations: {
         description_compliment: ':3'
@@ -90,7 +90,7 @@ export default {
       commands: {
         compliment: ['kehu', '<3']
       }
-    },{
+    },*/{
       name: 'numbers',
       translations: {
         description_startGame: 'woot',
@@ -99,6 +99,20 @@ export default {
       commands: {
         startGame: ['num'],
         registerAnswer: ['=']
+      }
+    },{
+      name: 'quotes',
+      translations: {
+        description_addReplyQuote: 'Lisää uusi quote (reply tallennettavaan viestiin)',
+        description_addQuote: 'Lisää uusi quote käsin',
+        description_getQuotes: 'Hae quoteista',
+        description_randomQuote: 'Satunnainen quote',
+        searchTerms: 'hakusanat',
+        exampleQuote: 'Essi Esimerkki: Eiiih'
+      },
+      commands: {
+        addQuote: ['quote', 'q'],
+        getQuotes: ['quotes', 'qs']
       }
     },{
       name: 'cat',
