@@ -70,7 +70,7 @@ class Quotes extends Custard {
 
   listCommands() {
     return [{
-      command: `${this.commands.addQuote[0]}`,
+      command: this.commands.addQuote[0],
       description: this.loc('description_addReplyQuote'),
       args: [{
         command: `${this.commands.addQuote[0]} <${ this.loc('exampleQuote') }>`,
