@@ -60,6 +60,10 @@ class Quotes extends Custard {
         q.toLowerCase().includes(t.toLowerCase())
       ).length > 0
     );
+    if(matchingQuotes.length === 0) {
+      message.react('🤷');
+      return;
+    }
     const quote = _.sample(matchingQuotes);
     message.channel.send(`> ${quote}`);
   }
