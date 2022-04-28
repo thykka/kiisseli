@@ -82,7 +82,7 @@ export default {
       translations: {
         getPictureDescription: 'Satunnainen kissakuva'
       }
-    },{
+    },/*{
       name: 'compliment',
       translations: {
         description_compliment: ':3'
@@ -90,7 +90,7 @@ export default {
       commands: {
         compliment: ['kehu', '<3']
       }
-    },{
+    },*/{
       name: 'numbers',
       translations: {
         description_startGame: 'woot',
@@ -101,10 +101,24 @@ export default {
         registerAnswer: ['=']
       }
     },{
+      name: 'quotes',
+      translations: {
+        description_addReplyQuote: 'Lisää uusi quote (reply tallennettavaan viestiin)',
+        description_addQuote: 'Lisää uusi quote käsin',
+        description_getQuotes: 'Hae quoteista',
+        description_randomQuote: 'Satunnainen quote',
+        searchTerms: 'hakusanat',
+        exampleQuote: 'Essi Esimerkki: Eiiih'
+      },
+      commands: {
+        addQuote: ['quote', 'q'],
+        getQuotes: ['quotes', 'qs']
+      }
+    },{
       name: 'cat',
       //channelId: '813884640926105620', // #kiisseli
       channelId: '813896696492326953', // #kiisseli-beta
-      interval: 1000 * 60 * 60 * 2,
+      interval: 1000 * 60, // * 60 * 2,
       appearMessages: [
         '/ᐠ.ꞈ.ᐟ\\ -miau',
         '^•ﻌ•^ฅ -kurnau'
