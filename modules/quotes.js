@@ -8,6 +8,14 @@ class Quotes extends Custard {
         addQuote: ['quote'],
         getQuotes: ['quotes']
       },
+      translations: {
+        description_addReplyQuote: 'Add a quote (reply to the message to save)',
+        description_addQuote: 'Add a quote manually',
+        description_getQuotes: 'Search quotes',
+        description_randomQuote: 'Random quote',
+        searchTerms: 'search terms',
+        exampleQuote: 'Melissa: What\'s all the buzz about?'
+      },
       storageKey: 'quotes'
     };
     super(defaults, options);
