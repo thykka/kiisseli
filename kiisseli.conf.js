@@ -1,6 +1,8 @@
+const debug = true;
+
 export default {
   autoConnect: true,
-  commandPrefix: '.',
+  commandPrefix: debug ? '>' : '.',
   commandsDescription: 'Komennot:',
   commandsSelfDescription: 'Näyttää komennot',
   modules: [
@@ -34,8 +36,7 @@ export default {
     },{
       name: 'knot',
       allowedChannels: [
-        //'813884640926105620', // #kiisseli
-        '813896696492326953', // #kiisseli-beta
+        debug ? '813884640926105620' : '813896696492326953'
       ], 
       commandsNewGame: ['solmu','s'],
       commandsShowScores: ['solmu.pisteet','s.'],
@@ -103,21 +104,19 @@ export default {
     },{
       name: 'quotes',
       translations: {
-        description_addReplyQuote: 'Lisää uusi quote (reply tallennettavaan viestiin)',
-        description_addQuote: 'Lisää uusi quote käsin',
-        description_getQuotes: 'Hae quoteista',
-        description_randomQuote: 'Satunnainen quote',
-        searchTerms: 'hakusanat',
-        exampleQuote: 'Essi Esimerkki: Eiiih'
+        description_quote_random: 'Satunnainen quote',
+        description_quote_search: 'Hae quotea',
+        description_quote_add: 'Lisää quote',
+        description_quote_reply: '(replynä quotetettavaan viestiin) Lisää quote',
+        searchTerms: 'kalja',
+        exampleQuote: 'EssiEsimerkki: Oispa kaljaa'
       },
       commands: {
-        addQuote: ['quote', 'q'],
-        getQuotes: ['quotes', 'qs']
+        quote: ['quote', 'q']
       }
     },{
       name: 'cat',
-      //channelId: '813884640926105620', // #kiisseli
-      channelId: '813896696492326953', // #kiisseli-beta
+      channelId: debug ? '813884640926105620' : '813896696492326953',
       interval: 1000 * 60 * 60 * 2,
       appearMessages: [
         '/ᐠ.ꞈ.ᐟ\\ -miau',

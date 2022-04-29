@@ -5,15 +5,14 @@ class Quotes extends Custard {
   constructor(options) {
     const defaults = {
       commands: {
-        addQuote: ['quote'],
-        getQuotes: ['quotes']
+        quote: ['q']
       },
       translations: {
-        description_addReplyQuote: 'Add a quote (reply to the message to save)',
-        description_addQuote: 'Add a quote manually',
-        description_getQuotes: 'Search quotes',
-        description_randomQuote: 'Random quote',
-        searchTerms: 'search terms',
+        description_quote_random: 'Show a random quote',
+        description_quote_search: 'Search for a quote',
+        description_quote_add: 'Add a quote',
+        description_quote_reply: '(as a reply) Add a quote',
+        searchTerms: 'buzz',
         exampleQuote: 'Melissa: What\'s all the buzz about?'
       },
       storageKey: 'quotes'
@@ -27,69 +26,74 @@ class Quotes extends Custard {
     this.quotes = await this.storage.getItem(this.storageKey) || [];
   }
 
+  async quote({ command, message }) {
+    const messageRef = message.reference?.messageID;
+    let quote;
+    if(messageRef) {
+      // adding quote by replying
+      const targetMessage = await message.channel.messages.fetch(messageRef);
+      if(targetMessage) {
+        this.saveQuote(`${ targetMessage.author.username }: ${ targetMessage.content }`);
+      }
+    } else if(message.content.includes(':')) {
+      // adding quote manually
+      quote = this.parseQuote(message.content);
+      if(quote) {
+        this.saveQuote(quote);
+        message.react('✍');
+      }
+    } else {
+      // querying quotes
+      const foundQuote = this.queryQuotes(command.args);
+      if(foundQuote) {
+        message.channel.send(`> ${foundQuote}`);
+      } else {
+        message.react('🤷');
+      }
+    }
+  }
+
+  saveQuote(quoteText) {
+    this.quotes.push(quoteText);
+    this.saveState();
+  }
+
   async saveState() {
     await this.storage.setItem(this.storageKey, this.quotes);
   }
 
-  async addQuote({ command, message }) {
-    const messageRef = message.reference?.messageID;
-    let quote;
-    if(messageRef) {
-      // Replying to a message with >quote
-      const quoteMessage = await message.channel.messages.fetch(messageRef);
-      quote = `${ quoteMessage.author.username }: ${ quoteMessage.content }`;
-    } else {
-      quote = this.parseQuote(message.content, command.name);
-    }
-    if(quote) {
-      this.quotes.push(quote);
-      this.saveState();
-      message.react('✍');
-    } else {
-      // no quote or reply provided
-      message.react('🙅');
-    }
+  parseQuote(quoteText) {
+    const firstSpace = quoteText.indexOf(' ');
+    return firstSpace < 0 ? '' : quoteText.slice(firstSpace+1);
   }
 
-  parseQuote(messageText) {
-    const firstSpace = messageText.indexOf(' ')
-    if(firstSpace < 0) return '';
-    const quoteText = messageText.slice(firstSpace+1);
-    return quoteText;
-  }
-
-  async getQuotes({ command, message }) {
-    const { args } = command;
-    if(args.length === 0) {
-      args.push('');
-    }
+  queryQuotes(keywords = []) {
+    if(keywords.length === 0) keywords.push('');
     const matchingQuotes = this.quotes.filter(q =>
-      args.filter(t =>
-        q.toLowerCase().includes(t.toLowerCase())
-      ).length > 0
+      keywords.every(k =>
+        q.toLowerCase().includes(k.toLowerCase())
+      )
     );
     if(matchingQuotes.length === 0) {
-      message.react('🤷');
-      return;
+      return false;
     }
-    const quote = _.sample(matchingQuotes);
-    message.channel.send(`> ${quote}`);
+    return _.sample(matchingQuotes);
   }
 
   listCommands() {
+    const command = this.commands.quote[0];
     return [{
-      command: this.commands.addQuote[0],
-      description: this.loc('description_addReplyQuote'),
+      command,
+      description: this.loc('description_quote_random'),
       args: [{
-        command: `${this.commands.addQuote[0]} <${ this.loc('exampleQuote') }>`,
-        description: this.loc('description_addQuote')
-      }]
-    },{
-      command: this.commands.getQuotes[0],
-      description: this.loc('description_randomQuote'),
-      args: [{
-        command: `${this.commands.getQuotes[0]} <${ this.loc('searchTerms') }>`,
-        description: this.loc('description_getQuotes')
+        command: `${command} <${ this.loc('searchTerms') }>`,
+        description: this.loc('description_quote_search')
+      },{
+        command: `${command} <${ this.loc('exampleQuote') }>`,
+        description: this.loc('description_quote_add')
+      },{
+        command,
+        description: this.loc('description_quote_reply')
       }]
     }]
   }
