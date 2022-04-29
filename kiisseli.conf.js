@@ -112,7 +112,7 @@ export default {
         exampleQuote: 'EssiEsimerkki: Oispa kaljaa'
       },
       commands: {
-        quote: ['quote', 'q']
+        quote: ['quote', 'q', 'qs']
       }
     },{
       name: 'cat',
