@@ -1,4 +1,4 @@
-const debug = false;
+const debug = !!process.env.DEBUG;
 
 export default {
   autoConnect: true,
@@ -147,6 +147,21 @@ export default {
         }
       ],
       statusMessage: v => `${v.successCount} kissa${v.successCount>1?'a':'n'}. Kissa sai odottaa ${v.reactionTime}`
+    },{
+      name: 'minecraft',
+      translations: {
+        description_serverStatus: 'Minecraft -serverin tiedot',
+        status_message: s => `⛏
+${ s.address }:${ s.port } (v${ s.version })
+${ s.players } pelaaja${ s.players === 1 ? '' : 'a' } linjoilla${
+  s.motd ? '\nmotd: ' + s.motd : ''
+}`,
+        status_players: s => `⛏ ${ s.players } pelaaja${ s.players === 1 ? '' : 'a' } linjoilla ⛏`
+      },
+      commands: {
+        serverStatus: ['mcs'],
+        serverPlayers: ['mc']
+      }
     }
   ]
 };
