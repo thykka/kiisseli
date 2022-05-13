@@ -31,7 +31,7 @@ class Brain {
     this.initEvents();
     this._modules = await this.loadModules(this.modules);
     this.events.emit('brain:ready');
-    console.log('brain initialized');
+    console.log((new Date).toISOString() + ' Brain initialized');
   }
 
   start() {
@@ -40,7 +40,7 @@ class Brain {
 
   initEvents() {
     this.client.on('ready', () => {
-      console.log('Connected to Discord');
+      console.log((new Date).toISOString() + ' Connected to Discord');
       this.events.emit('brain:connected', this.client);
     });
     this.client.on('message', this.processMessage.bind(this));
