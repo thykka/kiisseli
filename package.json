@@ -19,7 +19,7 @@
     "dotenv": "^8.2.0",
     "expressionparser": "^1.1.5",
     "lodash": "^4.17.21",
-    "node-fetch": "^2.6.1",
+    "node-fetch": "^2.6.7",
     "node-html-parser": "^3.0.4",
     "node-persist": "^3.1.0",
     "to-zalgo": "^1.0.1",
