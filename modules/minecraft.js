@@ -17,8 +17,8 @@ ${ s.players } player${ s.players === 1 ? '' : 's' } online${
 }`,
         status_players: s => `${ s.players } player${ s.players === 1 ? '' : 's' } online`,
         announce_message: s => {
-          const diff = s.previous.players - s.players;
-          const dir = diff > 0 ? '📉' : '📈';
+          const diff = s.players - s.previous.players;
+          const dir = diff < 0 ? '📉' : '📈';
           return `MCFT ${dir}: ${ s.players } players online`;
         }
       },
@@ -29,7 +29,7 @@ ${ s.players } player${ s.players === 1 ? '' : 's' } online${
     };
     super(defaults, options);
     Object.assign(this, defaults, options);
-    this.boundAnnounce = this.checkAnnounce.bind(this);
+    this.boundCheckAnnounce = this.checkAnnounce.bind(this);
   }
 
   initEvents(events) {
@@ -44,8 +44,9 @@ ${ s.players } player${ s.players === 1 ? '' : 's' } online${
 
   startAnnounce() {
     this.announceInterval = setInterval(
-      this.boundAnnounce, this.announceFrequencyMinutes * 1000 * 60
+      this.boundCheckAnnounce, this.announceFrequencyMinutes * 1000 * 60
     );
+    this.boundCheckAnnounce();
   }
 
   async checkAnnounce() {
