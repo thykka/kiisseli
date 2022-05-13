@@ -161,7 +161,7 @@ ${ s.players } pelaaja${ s.players === 1 ? '' : 'a' } linjoilla${
         status_players: s => `⛏ ${ s.players } pelaaja${ s.players === 1 ? '' : 'a' } linjoilla ⛏`,
         announce_message: s => {
           const diff = s.previous.players - s.players;
-          const dir = diff < 0 ? '📉' : '📈';
+          const dir = diff > 0 ? '📉' : '📈';
           return `⛏ MCFT ${dir}: ${ s.players } pelaaja${ s.players === 1 ? '' : 'a' } linjoilla`;
         }
       },
