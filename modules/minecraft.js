@@ -6,6 +6,8 @@ class Minecraft extends Custard {
     const defaults = {
       serverAddress: process.env.MC_SERVER_ADDRESS || 'localhost',
       serverPort: process.env.MC_SERVER_PORT || 25565,
+      announceChannelId: false,
+      announceFrequencyMinutes: 10,
       translations: {
         description_serverStatus: 'Minecraft server status',
         status_message: s => `Minecraft server status:
@@ -13,7 +15,12 @@ ${ s.address }:${ s.port } (v${ s.version })
 ${ s.players } player${ s.players === 1 ? '' : 's' } online${
   s.motd ? '\nmotd: ' + s.motd : ''
 }`,
-        status_players: s => `${ s.players } player${ s.players === 1 ? '' : 's' } online`
+        status_players: s => `${ s.players } player${ s.players === 1 ? '' : 's' } online`,
+        announce_message: s => {
+          const diff = s.previous.players - s.players;
+          const dir = diff > 0 ? '📉' : '📈';
+          return `MCFT ${dir}: ${ s.players } players online`;
+        }
       },
       commands: {
         serverStatus: ['mc'],
@@ -22,6 +29,40 @@ ${ s.players } player${ s.players === 1 ? '' : 's' } online${
     };
     super(defaults, options);
     Object.assign(this, defaults, options);
+    this.boundAnnounce = this.checkAnnounce.bind(this);
+  }
+
+  initEvents(events) {
+    this.events = events;
+    if(this.announceChannelId) {
+      this.events.on('brain:connected', async client => {
+        this.announceChannel = await client.channels.cache.get(this.announceChannelId);
+        this.startAnnounce();
+      });
+    }
+  }
+
+  startAnnounce() {
+    this.announceInterval = setInterval(
+      this.boundAnnounce, this.announceFrequencyMinutes * 1000 * 60
+    );
+  }
+
+  async checkAnnounce() {
+    const status = await this.fetchStatus();
+    if(!this.previousStatus) {
+      this.previousStatus = status;
+      return;
+    }
+    if(this.previousStatus.players !== status.players) {
+      this.announceChannel.send(
+        this.loc('announce_message', {
+          ...status,
+          previous: this.previousStatus
+        })
+      );
+    }
+    this.previousStatus = status;
   }
 
   async serverStatus({ message }) {

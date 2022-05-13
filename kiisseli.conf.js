@@ -149,6 +149,8 @@ export default {
       statusMessage: v => `${v.successCount} kissa${v.successCount>1?'a':'n'}. Kissa sai odottaa ${v.reactionTime}`
     },{
       name: 'minecraft',
+      announceChannelId: '761689641006792724',
+      announceFrequencyMinutes: 5,
       translations: {
         description_serverStatus: 'Minecraft -serverin tiedot',
         status_message: s => `⛏
@@ -156,7 +158,12 @@ ${ s.address }:${ s.port } (v${ s.version })
 ${ s.players } pelaaja${ s.players === 1 ? '' : 'a' } linjoilla${
   s.motd ? '\nmotd: ' + s.motd : ''
 }`,
-        status_players: s => `⛏ ${ s.players } pelaaja${ s.players === 1 ? '' : 'a' } linjoilla ⛏`
+        status_players: s => `⛏ ${ s.players } pelaaja${ s.players === 1 ? '' : 'a' } linjoilla ⛏`,
+        announce_message: s => {
+          const diff = s.previous.players - s.players;
+          const dir = diff < 0 ? '📉' : '📈';
+          return `⛏ MCFT ${dir}: ${ s.players } pelaaja${ s.players === 1 ? '' : 'a' } linjoilla`;
+        }
       },
       commands: {
         serverStatus: ['mcs'],
