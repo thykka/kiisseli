@@ -162,7 +162,7 @@ ${ s.players } pelaaja${ s.players === 1 ? '' : 'a' } linjoilla${
         announce_message: s => {
           const diff = s.players - s.previous.players;
           const dir = diff < 0 ? '📉' : '📈';
-          return `⛏ MCFT ${dir}: ${ s.players } pelaaja${ s.players === 1 ? '' : 'a' } linjoilla`;
+          return `⛏ ${dir}: ${ s.players } pelaaja${ s.players === 1 ? '' : 'a' } linjoilla`;
         }
       },
       commands: {
