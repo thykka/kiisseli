@@ -16,6 +16,9 @@ class Custard {
       this.initEvents = this._initEvents;
     }
     if(this.commands) {
+      if(typeof this.initEvents === 'function') {
+        this.originalInitEvents = this.initEvents;
+      }
       this.initEvents = this._initCommandEvents;
     }
   }
@@ -35,6 +38,9 @@ class Custard {
   _initCommandEvents(events) {
     this.events = events;
     (this.initCommands || this._initCommands).bind(this)();
+    if(this.originalInitEvents) {
+      this.originalInitEvents(events);
+    }
   }
 
   _initCommands() {
