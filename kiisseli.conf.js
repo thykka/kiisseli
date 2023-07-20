@@ -147,7 +147,7 @@ export default {
         }
       ],
       statusMessage: v => `${v.successCount} kissa${v.successCount>1?'a':'n'}. Kissa sai odottaa ${v.reactionTime}`
-    },{
+    }/*,{
       name: 'minecraft',
       announceChannelId: '761689641006792724',
       announceFrequencyMinutes: 5,
@@ -169,6 +169,6 @@ ${ s.players } pelaaja${ s.players === 1 ? '' : 'a' } linjoilla${
         serverStatus: ['mcs'],
         serverPlayers: ['mc']
       }
-    }
+    }*/
   ]
 };
