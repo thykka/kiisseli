@@ -37,7 +37,7 @@ export default {
       name: 'knot',
       allowedChannels: [
         debug ? '813884640926105620' : '813896696492326953'
-      ], 
+      ],
       commandsNewGame: ['solmu','s'],
       commandsShowScores: ['solmu.pisteet','s.'],
       commandsRequestHint: ['solmu.vihje','s?'],

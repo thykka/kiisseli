@@ -62,6 +62,7 @@ class Brain {
   }
 
   async loadModules(modules) {
+    console.log("Loading modules...", modules.map(module => module.name).join('\n'));
     return Promise.all(modules.map(config => this.loadModule(config)));
   }
 

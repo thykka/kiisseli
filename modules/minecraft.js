@@ -78,7 +78,7 @@ ${ s.players } player${ s.players === 1 ? '' : 's' } online${
   }
 
   async fetchStatus(address = this.serverAddress, port = this.serverPort) {
-    const status = await fetch(`https://api.mcsrvstat.us/2/${address}:${port}`).then(r => r.json());
+    const status = await fetch(`https://api.mcsrvstat.us/2/${address}:${port}`).then(r => r.json()).catch(e => e);
     if(typeof status !== 'object' || status === null) return false;
     return {
       address: status.hostname ?? address,
